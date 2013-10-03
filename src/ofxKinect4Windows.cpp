@@ -32,35 +32,35 @@ const ofVec3f& SkeletonBone::getStartPosition() const {
 		return position;
 	}
 
-	//! Returns rotation of the bone relative to the parent bone.
-	const ofQuaternion&	SkeletonBone::getRotation() const {
-		return rotation.getRotate();
-	}
-	//! Returns rotation matrix of the bone relative to the parent bone.
-	const ofMatrix4x4& SkeletonBone::getRotationMatrix() const {
-		return rotation;
-	}
-	//! Returns index of start joint.
-	const int SkeletonBone::getStartJoint() const {
-		return startJoint;
-	}
 
-	const ofQuaternion SkeletonBone::getCameraRotation() const		{
-			return cameraRotation.getRotate();
-	}
+const ofQuaternion&	SkeletonBone::getRotation() const {
+	return rotation.getRotate();
+}
 
-	const ofMatrix4x4 SkeletonBone::getCameraRotationMatrix() const {
-		return rotation;
-	}
+const ofMatrix4x4& SkeletonBone::getRotationMatrix() const {
+	return rotation;
+}
 
-	int SkeletonBone::getEndJoint() const {
-		return endJoint;
-	}
+const int SkeletonBone::getStartJoint() const {
+	return startJoint;
+}
 
-	const ofVec3f& SkeletonBone::getScreenPosition() const
-	{
-		return screenPosition;
-	}
+const ofQuaternion SkeletonBone::getCameraRotation() const		{
+		return cameraRotation.getRotate();
+}
+
+const ofMatrix4x4 SkeletonBone::getCameraRotationMatrix() const {
+	return rotation;
+}
+
+int SkeletonBone::getEndJoint() const {
+	return endJoint;
+}
+
+const ofVec3f& SkeletonBone::getScreenPosition() const
+{
+	return screenPosition;
+}
 
 
 
@@ -168,7 +168,7 @@ void ofxKinect4Windows::update(){
 
 	if(bNeedsUpdateVideo){
 		bIsFrameNewVideo = true;
-		if(bVideoIsIR)
+		if(bIsVideoInfrared)
 		{
 			swap(irPixels, irPixelsBack);
 			bNeedsUpdateVideo = false;
@@ -180,7 +180,7 @@ void ofxKinect4Windows::update(){
 			bNeedsUpdateVideo = false;
 		}
 		if(bUseTexture) {
-			if(bVideoIsIR) 
+			if(bIsVideoInfrared) 
 			{
 				irTex.loadData(irPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 			} 
@@ -240,16 +240,14 @@ void ofxKinect4Windows::update(){
 
 		}
 
-	} /*else {
+	} else {
 		bNeedsUpdateSkeleton = false;
-	}*/
+	}
 }
 
 //----------------------------------------------------------
 void ofxKinect4Windows::updateDepthPixels() {
 	for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
-		//if( i == 160*120) cout << depthPixelsRaw[i] << endl;
-		//depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[i], 0, depthLookupTable.size()-1) ];
 		depthPixels[i] = ofClamp(depthPixelsRaw[i] >> 7, 0, depthLookupTable.size()-1);
 	}
 }
@@ -415,7 +413,10 @@ bool ofxKinect4Windows::startColorStream( int width, int height )
 
 bool ofxKinect4Windows::startIRStream( int width, int height )
 {
-		_NUI_IMAGE_RESOLUTION res;
+	
+	bIsVideoInfrared = true;
+
+	_NUI_IMAGE_RESOLUTION res;
 	if( width == 320 ) {
 		res = NUI_IMAGE_RESOLUTION_320x240;
 	} else if( width == 640 ) {
@@ -500,13 +501,12 @@ void ofxKinect4Windows::threadedFunction(){
 
 		// KinectGetDepthFrame( _In_ HKINECT hKinect, ULONG cbBufferSize, _Out_cap_(cbBufferSize) BYTE* pDepthBuffer, _Out_opt_ LONGLONG* liTimeStamp );
 
-		if(bVideoIsIR) 
+		if(bIsVideoInfrared) 
 		{
 			if( SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, irPixelsBack.getPixels(), &timestamp) ) )
 			{
 				bNeedsUpdateVideo = true;
 				// ProcessColorFrameData(&format, pColorBuffer);
-				//printf("Video Timestamp: %d\r\n", timestamp);
 			}
 		}
 		else {
@@ -514,20 +514,16 @@ void ofxKinect4Windows::threadedFunction(){
 			{
 				bNeedsUpdateVideo = true;
 				// ProcessColorFrameData(&format, pColorBuffer);
-				//printf("Video Timestamp: %d\r\n", timestamp);
 			}
 		}
 
 		if( SUCCEEDED ( KinectGetSkeletonFrame(hKinect, &k4wSkeletons )) ) 
-		//if( SUCCEEDED ( KinectGetSkeletonDataAlignedToColor( hKinect, sizeof(NUI_SKELETON_DATA) * 6, &k4wSkeletons[0], &timestamp) ))
 		{
-			//cout << " skeletonia timestamp " << timestamp << endl;
 			bNeedsUpdateSkeleton = true;
 		}
 
 		//TODO: TILT
 		//TODO: ACCEL
-		//TODO: SKELETON
 		//TODO: FACE
 		//TODO: AUDIO
 		ofSleepMillis(10);

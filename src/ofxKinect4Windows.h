@@ -88,7 +88,6 @@ class ofxKinect4Windows : protected ofThread {
 	KINECT_IMAGE_FRAME_FORMAT colorFormat;
 	NUI_SKELETON_FRAME k4wSkeletons;
 
-	bool bVideoIsIR;
   	bool bGrabberInited;
 	vector<Skeleton> skeletons;
 
