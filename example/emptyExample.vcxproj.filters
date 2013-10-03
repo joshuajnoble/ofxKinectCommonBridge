@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\testApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ofxKinect4Windows.cpp">
+      <Filter>addons\ofxKinect4Windows\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{13c9f567-6727-4d90-bddb-d31a32d97731}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxKinect4Windows">
+      <UniqueIdentifier>{90b63a78-8041-4c17-9f90-f44876282857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxKinect4Windows\src">
+      <UniqueIdentifier>{31cc54db-9e25-4791-8d41-957346a4903a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxKinect4Windows\libs">
+      <UniqueIdentifier>{b3ad244f-0f4f-4a4e-9245-a0864edcaea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxKinect4Windows\libs\KinectWrapper">
+      <UniqueIdentifier>{2450e4cc-17b5-4935-93fb-21fdb15dfe10}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\testApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxKinect4Windows.h">
+      <Filter>addons\ofxKinect4Windows\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\KinectWrapper\include\KinectWrapperLib.h">
+      <Filter>addons\ofxKinect4Windows\libs\KinectWrapper</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+</Project>
