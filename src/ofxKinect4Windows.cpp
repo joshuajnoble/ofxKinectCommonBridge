@@ -69,12 +69,12 @@ ofxKinect4Windows::ofxKinect4Windows(){
 	bNeedsUpdateVideo = false;
 	bIsFrameNewDepth = false;
 	bNeedsUpdateDepth = false;
-
 	bIsVideoInfrared = false;
-
 	bGrabberInited = false;
 
+	bUsingSkeletons = false;
   	bUseTexture = true;
+	bProgrammableRenderer = false;
 	
 	setDepthClipping();
 }
@@ -87,7 +87,8 @@ void ofxKinect4Windows::setDepthClipping(float nearClip, float farClip){
 }
 
 //---------------------------------------------------------------------------
-void ofxKinect4Windows::updateDepthLookupTable() {
+void ofxKinect4Windows::updateDepthLookupTable()
+{
 	unsigned char nearColor = bNearWhite ? 255 : 0;
 	unsigned char farColor = bNearWhite ? 0 : 255;
 	unsigned int maxDepthLevels = 10001;
@@ -100,6 +101,12 @@ void ofxKinect4Windows::updateDepthLookupTable() {
 
 bool ofxKinect4Windows::simpleInit()
 {
+
+	if(ofGetCurrentRenderer()->getType() == ofGLProgrammableRenderer::TYPE)
+	{
+		bProgrammableRenderer = true;
+	}
+
 	hKinect = KinectOpenDefaultSensor();
 
 	KINECT_IMAGE_FRAME_FORMAT cf = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
@@ -127,7 +134,13 @@ bool ofxKinect4Windows::simpleInit()
 		depthPixelsRaw.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		depthPixelsRawBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		if(bUseTexture){
-			depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+
+			if(bProgrammableRenderer ) {
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);
+				depthTex.setRGToRGBASwizzles(true);
+			} else {
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+			}
 		}
 	} 
 	else{
@@ -186,7 +199,12 @@ void ofxKinect4Windows::update(){
 			} 
 			else 
 			{
-				videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
+				if( bProgrammableRenderer ) {
+					// programmable renderer likes this
+					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_BGRA);
+				} else {
+					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
+				}
 			}
 		}
 	} else {
@@ -203,22 +221,25 @@ void ofxKinect4Windows::update(){
 //		}
 
 		if(bUseTexture) {
-			depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+			//depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+			if( bProgrammableRenderer ) {
+				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
+				//depthTex.setRGToRGBASwizzles(true);
+			} else {
+				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+			}
 		}
 
 	} else {
 		bIsFrameNewDepth = false;
 	}
 
-	if(bNeedsUpdateSkeleton)
+	if(bUsingSkeletons && bNeedsUpdateSkeleton)
 	{	
 
 		bIsSkeletonFrameNew = true;
 		bNeedsUpdateSkeleton = false;
 		bool foundSkeleton = false;
-
-		// delete every time?
-		//skeletons.clear();
 
 		for ( int i = 0; i < NUI_SKELETON_COUNT; i++ ) 
 		{
@@ -247,8 +268,20 @@ void ofxKinect4Windows::update(){
 
 //----------------------------------------------------------
 void ofxKinect4Windows::updateDepthPixels() {
-	for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
-		depthPixels[i] = ofClamp(depthPixelsRaw[i] >> 7, 0, depthLookupTable.size()-1);
+
+	if(bProgrammableRenderer) {
+
+		for(int i = 0; i < depthPixelsRaw.getWidth()*depthPixelsRaw.getHeight(); i++ ) {
+			float dval = ofClamp(depthPixelsRaw[i] >> 7, 0, depthLookupTable.size()-1);
+			depthPixels[i * 3] = dval;
+			depthPixels[i * 3 +1] = dval;
+			depthPixels[i * 3 +2] = dval;
+		}
+
+	} else {
+		for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
+			depthPixels[i] = ofClamp(depthPixelsRaw[i] >> 7, 0, depthLookupTable.size()-1);
+		}
 	}
 }
 
@@ -342,6 +375,12 @@ bool ofxKinect4Windows::init( int id )
 		return false;
 	}
 
+
+	if(ofGetCurrentRenderer()->getType() == ofGLProgrammableRenderer::TYPE)
+	{
+		bProgrammableRenderer = true;
+	}
+
 	return true;
 }
 
@@ -363,12 +402,30 @@ bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
 //		pDepthBuffer = new BYTE[depthFormat.cbBufferSize];
 		depthFormat = df;
 		ofLog() << "allocating a buffer of size " << depthFormat.dwWidth*depthFormat.dwHeight*sizeof(unsigned short) << " when k4w wants size " << depthFormat.cbBufferSize << endl;
-		depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+		
+		if(bProgrammableRenderer) {
+			depthPixels.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
+			depthPixelsBack.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
+		} else {
+			depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+			depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+		}
+
 		depthPixelsRaw.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		depthPixelsRawBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		if(bUseTexture){
-			depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+
+			if(bProgrammableRenderer)
+			{
+				//int w, int h, int glInternalFormat, bool bUseARBExtention, int glFormat, int pixelType
+				//depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8, true, GL_R8, GL_UNSIGNED_BYTE);
+				//depthTex.setRGToRGBASwizzles(true);
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
+			}
+			else
+			{
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+			}
 		}
 	} 
 	else{
@@ -465,6 +522,7 @@ bool ofxKinect4Windows::startSkeletonStream( bool seated )
 
 		}
 
+		bUsingSkeletons = true;
 		return true;
 	} else {
 		ofLog() << " startSkeletonStream() cannot initialize stream " << endl;
@@ -517,9 +575,11 @@ void ofxKinect4Windows::threadedFunction(){
 			}
 		}
 
-		if( SUCCEEDED ( KinectGetSkeletonFrame(hKinect, &k4wSkeletons )) ) 
-		{
-			bNeedsUpdateSkeleton = true;
+		if(bUsingSkeletons) {
+			if( SUCCEEDED ( KinectGetSkeletonFrame(hKinect, &k4wSkeletons )) ) 
+			{
+				bNeedsUpdateSkeleton = true;
+			}
 		}
 
 		//TODO: TILT

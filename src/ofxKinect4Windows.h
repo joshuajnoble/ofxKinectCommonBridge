@@ -47,11 +47,15 @@ class ofxKinect4Windows : protected ofThread {
 	bool startSkeletonStream( bool seated );
 	bool start();
 
+	void stop() {
+		stopThread();
+	}	
+
   	/// is the current frame new?
 	bool isFrameNew();
 	bool isFrameNewVideo();
 	bool isFrameNewDepth();
-	bool isFrameNewSkeleton();
+	bool isNewSkeleton();
 
 	void setDepthClipping(float nearClip=500, float farClip=4000);
 	
@@ -80,6 +84,18 @@ class ofxKinect4Windows : protected ofThread {
 	void drawIR( float x, float y, float w, float h );
 
 	vector<Skeleton> getSkeletons();
+
+	ofTexture &getDepthTexture() {
+		return depthTex;
+	}
+
+	ofTexture &getIRTexture() {
+		return irTex;
+	}
+
+	ofTexture &getColorTexture() {
+		return videoTex;
+	}
 
   private:
 
@@ -122,8 +138,12 @@ class ofxKinect4Windows : protected ofThread {
 	bool bNeedsUpdateDepth;
 	bool bNeedsUpdateSkeleton;
 	bool bIsSkeletonFrameNew;
+	bool bProgrammableRenderer;
 
 	bool bIsVideoInfrared;
+	bool bUsingSkeletons;
+	bool bUsingDepth;
+
 	void threadedFunction();
 
 };

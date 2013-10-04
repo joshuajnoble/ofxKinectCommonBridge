@@ -20,4 +20,6 @@ class testApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 
 		ofxKinect4Windows kinect;
+		ofShader k4wShader;
+		ofPlanePrimitive plane;
 };
