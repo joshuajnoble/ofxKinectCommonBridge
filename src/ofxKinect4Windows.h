@@ -37,8 +37,6 @@ class ofxKinect4Windows : protected ofThread {
   public:
 	ofxKinect4Windows();
 
-//	bool simpleInit();
-
 	// new API
 	bool initSensor( int id = 0 );
 	bool initDepthStream( int width, int height, bool nearMode = false );

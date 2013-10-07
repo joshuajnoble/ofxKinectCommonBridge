@@ -190,7 +190,12 @@ void ofxKinect4Windows::update(){
 		if(bUseTexture) {
 			if(bIsVideoInfrared) 
 			{
-				irTex.loadData(irPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+				if(bProgrammableRenderer){
+					irTex.loadData(irPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RED);
+				}
+				else{
+					irTex.loadData(irPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+				}
 			} 
 			else 
 			{
@@ -537,7 +542,13 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 		irPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		irPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_GRAYSCALE);
 		if(bUseTexture){
-			irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+			if(bProgrammableRenderer){
+				irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_R8);
+				irTex.setRGToRGBASwizzles(true);
+			}
+			else{
+				irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+			}
 		}
 	}
 	else{
