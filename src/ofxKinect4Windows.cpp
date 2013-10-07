@@ -166,6 +166,10 @@ bool ofxKinect4Windows::isFrameNewDepth(){
 	return bIsFrameNewDepth;
 }
 
+bool ofxKinect4Windows::isNewSkeleton() {
+	return bNeedsUpdateSkeleton;
+}
+
 vector<Skeleton> ofxKinect4Windows::getSkeletons() 
 {
 	return skeletons;
@@ -244,6 +248,7 @@ void ofxKinect4Windows::update(){
 		for ( int i = 0; i < NUI_SKELETON_COUNT; i++ ) 
 		{
 			skeletons.at( i ).clear();
+
 			if (  k4wSkeletons.SkeletonData[ i ].eTrackingState == NUI_SKELETON_TRACKED || k4wSkeletons.SkeletonData[ i ].eTrackingState == NUI_SKELETON_POSITION_ONLY ) {
 				//cout << " we have a skeleton " << ofGetElapsedTimeMillis() << endl;
 				_NUI_SKELETON_BONE_ORIENTATION bones[ NUI_SKELETON_POSITION_COUNT ];
@@ -254,8 +259,10 @@ void ofxKinect4Windows::update(){
 				for ( int j = 0; j < NUI_SKELETON_POSITION_COUNT; j++ ) 
 				{
 					SkeletonBone bone( k4wSkeletons.SkeletonData[i].SkeletonPositions[j], bones[j] );
-					( skeletons.begin())->insert( std::pair<int, SkeletonBone>( j, bone ) );
+					( skeletons.begin())->insert( std::pair<NUI_SKELETON_POSITION_INDEX, SkeletonBone>( NUI_SKELETON_POSITION_INDEX(j), bone ) );
 				}
+
+				bNeedsUpdateSkeleton = true;
 
 			}
 

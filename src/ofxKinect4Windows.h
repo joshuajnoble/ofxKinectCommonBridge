@@ -31,7 +31,7 @@ private:
 	ofVec2f screenPosition;
 };
 
-typedef map<int, SkeletonBone> Skeleton;
+typedef map<_NUI_SKELETON_POSITION_INDEX, SkeletonBone> Skeleton;
 
 class ofxKinect4Windows : protected ofThread {
   public:
