@@ -215,7 +215,7 @@ void ofxKinect4Windows::update(){
 		swap(depthPixelsRaw, depthPixelsRawBack);
 		bNeedsUpdateDepth = false;
 		updateDepthPixels();
-		cout << "Updating depth" << endl;
+
 		if(bUseTexture) {
 			//depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 			if( bProgrammableRenderer ) {

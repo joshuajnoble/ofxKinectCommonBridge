@@ -61,6 +61,7 @@ class ofxKinect4Windows : protected ofThread {
 	///
 	/// make sure to call this to update to the latest incoming frames
 	void update();
+	ofPixels& getColorPixelsRef();
 	ofPixels & getDepthPixelsRef();       	///< grayscale values
 	ofShortPixels & getRawDepthPixelsRef();	///< raw 11 bit values
 
