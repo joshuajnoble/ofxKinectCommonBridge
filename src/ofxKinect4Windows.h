@@ -96,9 +96,6 @@ class ofxKinect4Windows : protected ofThread {
 		return depthTex;
 	}
 
-	ofTexture &getIRTexture() {
-		return irTex;
-	}
 
 	ofTexture &getColorTexture() {
 		return videoTex;
@@ -127,7 +124,7 @@ class ofxKinect4Windows : protected ofThread {
 	ofTexture depthTex; ///< the depth texture
 	ofTexture rawDepthTex; ///<
 	ofTexture videoTex; ///< the RGB texture
-	ofTexture irTex;
+	//ofTexture irTex;
 
 	ofPixels videoPixels;
 	ofPixels videoPixelsBack;			///< rgb back
@@ -136,10 +133,10 @@ class ofxKinect4Windows : protected ofThread {
 	ofShortPixels depthPixelsRaw;
 	ofShortPixels depthPixelsRawBack;	///< depth back
 
-	ofShortPixels irPixelsRaw;
-	ofShortPixels irPixelsBackRaw;
-	ofPixels irPixels;
-	ofPixels irPixelsBack;
+	//ofShortPixels irPixelsRaw;
+	//ofShortPixels irPixelsBackRaw;
+	//ofPixels irPixels;
+	//ofPixels irPixelsBack;
 
 	bool bIsFrameNewVideo;
 	bool bNeedsUpdateVideo;

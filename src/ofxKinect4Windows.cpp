@@ -174,27 +174,20 @@ void ofxKinect4Windows::update(){
 		return;
 	}
 
-	if(bNeedsUpdateVideo){
+	if(bNeedsUpdateVideo)
+	{
 		bIsFrameNewVideo = true;
-		if(bIsVideoInfrared)
-		{
-			swap(irPixels, irPixelsBack);
-			bNeedsUpdateVideo = false;
-			//updateIRPixels();
-		}
-		else
-		{
-			swap(videoPixels,videoPixelsBack);
-			bNeedsUpdateVideo = false;
-		}
+		swap(videoPixels,videoPixelsBack);
+		bNeedsUpdateVideo = false;
+
 		if(bUseTexture) {
 			if(bIsVideoInfrared) 
 			{
 				if(bProgrammableRenderer){
-					irTex.loadData(irPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RED);
+					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RED);
 				}
 				else{
-					irTex.loadData(irPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 				}
 			} 
 			else 
@@ -278,9 +271,9 @@ void ofxKinect4Windows::updateDepthPixels() {
 
 //------------------------------------
 void ofxKinect4Windows::updateIRPixels() {
-	for(int i = 0; i < irPixels.getWidth()*irPixels.getHeight(); i++) {
-		irPixels[i] =  ofClamp(irPixels[i] >> 1, 0, 255 );
-	}
+	//for(int i = 0; i < irPixels.getWidth()*irPixels.getHeight(); i++) {
+	//	irPixels[i] =  ofClamp(irPixels[i] >> 1, 0, 255 );
+	//}
 }
 
 //------------------------------------
@@ -369,11 +362,6 @@ void ofxKinect4Windows::drawDepth(const ofRectangle & rect) {
 	drawDepth(rect.x, rect.y, rect.width, rect.height);
 }
 
-void ofxKinect4Windows::drawIR(float _x, float _y, float _w, float _h) {
-	if(bUseTexture) {
-		irTex.draw(_x, _y, _w, _h);
-	}
-}
 
 bool ofxKinect4Windows::initSensor( int id )
 {
@@ -539,18 +527,17 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 		
 		cout << colorFormat.dwWidth << " " << colorFormat.dwHeight << endl;
 		
-		irPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		irPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_GRAYSCALE);
+		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_GRAYSCALE);
 		if(bUseTexture){
 
 			if(bProgrammableRenderer){
-				irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_R8);
-				irTex.setRGToRGBASwizzles(true);
+				videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_R8);
+				videoTex.setRGToRGBASwizzles(true);
 			}
 			else{
-				irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+				videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 			}
-			irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 		}
 	}
 	else{
@@ -641,20 +628,10 @@ void ofxKinect4Windows::threadedFunction(){
 
 		// KinectGetDepthFrame( _In_ HKINECT hKinect, ULONG cbBufferSize, _Out_cap_(cbBufferSize) BYTE* pDepthBuffer, _Out_opt_ LONGLONG* liTimeStamp );
 
-		if(bIsVideoInfrared) 
+		if( SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, videoPixelsBack.getPixels(), &timestamp) ) )
 		{
-			if( SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, irPixelsBack.getPixels(), &timestamp) ) )
-			{
-				bNeedsUpdateVideo = true;
-				// ProcessColorFrameData(&format, pColorBuffer);
-			}
-		}
-		else {
-			if( SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, videoPixelsBack.getPixels(), &timestamp) ) )
-			{
-				bNeedsUpdateVideo = true;
-				// ProcessColorFrameData(&format, pColorBuffer);
-			}
+			bNeedsUpdateVideo = true;
+			// ProcessColorFrameData(&format, pColorBuffer);
 		}
 
 		if(bUsingSkeletons) {
