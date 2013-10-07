@@ -542,6 +542,7 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 		irPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		irPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_GRAYSCALE);
 		if(bUseTexture){
+
 			if(bProgrammableRenderer){
 				irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_R8);
 				irTex.setRGToRGBASwizzles(true);
@@ -549,6 +550,7 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 			else{
 				irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 			}
+			irTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 		}
 	}
 	else{
