@@ -37,19 +37,17 @@ class ofxKinect4Windows : protected ofThread {
   public:
 	ofxKinect4Windows();
 
-	bool simpleInit();
+//	bool simpleInit();
 
 	// new API
-	bool init( int id );
-	bool startDepthStream( int width, int height, bool nearMode );
-	bool startColorStream( int width, int height );
-	bool startIRStream( int width, int height );
-	bool startSkeletonStream( bool seated );
+	bool initSensor( int id = 0 );
+	bool initDepthStream( int width, int height, bool nearMode = false );
+	bool initColorStream( int width, int height );
+	bool initIRStream( int width, int height );
+	bool initSkeletonStream( bool seated );
 	bool start();
 
-	void stop() {
-		stopThread();
-	}	
+	void stop();
 
   	/// is the current frame new?
 	bool isFrameNew();
@@ -114,7 +112,8 @@ class ofxKinect4Windows : protected ofThread {
 	KINECT_IMAGE_FRAME_FORMAT colorFormat;
 	NUI_SKELETON_FRAME k4wSkeletons;
 
-  	bool bGrabberInited;
+  	bool bInited;
+	bool bStarted;
 	vector<Skeleton> skeletons;
 
 	//quantize depth buffer to 8 bit range

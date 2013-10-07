@@ -19,9 +19,8 @@ SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE
 }
 
 const ofVec3f& SkeletonBone::getStartPosition() const {
-		return position;
-	}
-
+	return position;
+}
 
 const ofQuaternion&	SkeletonBone::getRotation() const {
 	return rotation.getRotate();
@@ -36,7 +35,7 @@ const int SkeletonBone::getStartJoint() const {
 }
 
 const ofQuaternion SkeletonBone::getCameraRotation() const		{
-		return cameraRotation.getRotate();
+	return cameraRotation.getRotate();
 }
 
 const ofMatrix4x4 SkeletonBone::getCameraRotationMatrix() const {
@@ -53,12 +52,15 @@ const ofVec3f& SkeletonBone::getScreenPosition() const
 }
 
 ofxKinect4Windows::ofxKinect4Windows(){
+	hKinect = NULL;
+
 	bIsFrameNewVideo = false;
 	bNeedsUpdateVideo = false;
 	bIsFrameNewDepth = false;
 	bNeedsUpdateDepth = false;
 	bIsVideoInfrared = false;
-	bGrabberInited = false;
+	bInited = false;
+	bStarted = false;
 
 	bUsingSkeletons = false;
   	bUseTexture = true;
@@ -87,6 +89,7 @@ void ofxKinect4Windows::updateDepthLookupTable()
 	}
 }
 
+/*
 bool ofxKinect4Windows::simpleInit()
 {
 
@@ -140,6 +143,7 @@ bool ofxKinect4Windows::simpleInit()
 	bGrabberInited = true;
 	return true;
 }
+*/
 
 /// is the current frame new?
 bool ofxKinect4Windows::isFrameNew(){
@@ -158,8 +162,7 @@ bool ofxKinect4Windows::isNewSkeleton() {
 	return bNeedsUpdateSkeleton;
 }
 
-vector<Skeleton> &ofxKinect4Windows::getSkeletons() 
-{
+vector<Skeleton> &ofxKinect4Windows::getSkeletons() {
 	return skeletons;
 }
 
@@ -167,7 +170,8 @@ vector<Skeleton> &ofxKinect4Windows::getSkeletons()
 ///
 /// make sure to call this to update to the latest incoming frames
 void ofxKinect4Windows::update(){
-	if(!bGrabberInited) {
+	if(!bStarted) {
+		ofLogError("ofxKinect4Windows::update") << "Grabber not started";
 		return;
 	}
 
@@ -206,14 +210,12 @@ void ofxKinect4Windows::update(){
 	}
 
 	if(bNeedsUpdateDepth){
-		bIsFrameNewDepth = true;
-//		if(this->lock()) {
-			swap(depthPixelsRaw, depthPixelsRawBack);
-			bNeedsUpdateDepth = false;
-//			this->unlock();
-			updateDepthPixels();
-//		}
 
+		bIsFrameNewDepth = true;
+		swap(depthPixelsRaw, depthPixelsRawBack);
+		bNeedsUpdateDepth = false;
+		updateDepthPixels();
+		cout << "Updating depth" << endl;
 		if(bUseTexture) {
 			//depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 			if( bProgrammableRenderer ) {
@@ -225,7 +227,6 @@ void ofxKinect4Windows::update(){
 				rawDepthTex.loadData(depthPixelsRaw.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
 			}
 		}
-
 	} else {
 		bIsFrameNewDepth = false;
 	}
@@ -273,10 +274,16 @@ void ofxKinect4Windows::updateDepthPixels() {
 	}
 }
 
+//------------------------------------
 void ofxKinect4Windows::updateIRPixels() {
 	for(int i = 0; i < irPixels.getWidth()*irPixels.getHeight(); i++) {
 		irPixels[i] =  ofClamp(irPixels[i] >> 1, 0, 255 );
 	}
+}
+
+//------------------------------------
+ofPixels& ofxKinect4Windows::getColorPixelsRef(){
+	return videoPixels;
 }
 
 //------------------------------------
@@ -366,14 +373,17 @@ void ofxKinect4Windows::drawIR(float _x, float _y, float _w, float _h) {
 	}
 }
 
-bool ofxKinect4Windows::init( int id )
+bool ofxKinect4Windows::initSensor( int id )
 {
+	if(bStarted){
+		ofLogError("ofxKinect4Windows::initSensor") << "Cannot configure once the sensor has already started" << endl;
+		return false;
+	}
+
 	UINT count = KinectGetSensorCount();
 	WCHAR portID[KINECT_MAX_PORTID_LENGTH];
 
-	if( SUCCEEDED(KinectGetPortIDByIndex( 0, _countof(portID), portID ))) {
-		
-	} else {
+	if( !SUCCEEDED(KinectGetPortIDByIndex( 0, _countof(portID), portID ))) {
 		ofLog() << " can't find kinect of ID " << id << endl;
 		return false;
 	}
@@ -381,10 +391,9 @@ bool ofxKinect4Windows::init( int id )
 	hKinect = KinectOpenSensor(portID);
 
 	if(!hKinect) {
-		ofLog() << " can't open kinect of ID " << id << endl;
+		ofLogError("ofxKinect4Windows::initSensor") << " can't open Kinect of ID " << id;
 		return false;
 	}
-
 
 	if(ofGetCurrentRenderer()->getType() == ofGLProgrammableRenderer::TYPE)
 	{
@@ -394,8 +403,12 @@ bool ofxKinect4Windows::init( int id )
 	return true;
 }
 
-bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
+bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
 {
+	if(bStarted){
+		ofLogError("ofxKinect4Windows::initDepthStream") << " Cannot configure once the sensor has already started";
+		return false;
+	}
 
 	_NUI_IMAGE_RESOLUTION res;
 	if( width == 320 ) {
@@ -403,7 +416,7 @@ bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
 	} else if( width == 640 ) {
 		res = NUI_IMAGE_RESOLUTION_640x480;
 	} else {
-		ofLog() << " invalid image size passed to startDepthStream() " << endl;
+		ofLogError("ofxKinect4Windows::initDepthStream") << " invalid image size" << endl;
 	}
 
 	KINECT_IMAGE_FRAME_FORMAT df = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
@@ -452,8 +465,13 @@ bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
 	return true;
 }
 
-bool ofxKinect4Windows::startColorStream( int width, int height )
+bool ofxKinect4Windows::initColorStream( int width, int height )
 {
+	if(bStarted){
+		ofLogError("ofxKinect4Windows::startIRStream") << " Cannot configure once the sensor has already started";
+		return false;
+	}
+
 	KINECT_IMAGE_FRAME_FORMAT cf = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
 
 	_NUI_IMAGE_RESOLUTION res;
@@ -485,9 +503,13 @@ bool ofxKinect4Windows::startColorStream( int width, int height )
 	return true;
 }
 
-bool ofxKinect4Windows::startIRStream( int width, int height )
+bool ofxKinect4Windows::initIRStream( int width, int height )
 {
-	
+	if(bStarted){
+		ofLogError("ofxKinect4Windows::startIRStream") << " Cannot configure when the sensor has already started";
+		return false;
+	}
+
 	bIsVideoInfrared = true;
 
 	_NUI_IMAGE_RESOLUTION res;
@@ -522,11 +544,17 @@ bool ofxKinect4Windows::startIRStream( int width, int height )
 		ofLogError("ofxKinect4Windows::open") << "Error opening color stream";
 		return false;
 	}
+	bInited = true;
 	return true;
 }
 
-bool ofxKinect4Windows::startSkeletonStream( bool seated )
+bool ofxKinect4Windows::initSkeletonStream( bool seated )
 {
+	if(bStarted){
+		ofLogError("ofxKinect4Windows::initSkeletonStream") << "Cannot configure once the sensor has already started";
+		return false;
+	}
+
 	NUI_TRANSFORM_SMOOTH_PARAMETERS p = { 0.5f, 0.1f, 0.5f, 0.1f, 0.1f };
 	if(SUCCEEDED( KinectEnableSkeletalStream( hKinect, seated, SkeletonSelectionModeDefault, &p))) {
 		//cout << " we have skeletons " << endl;
@@ -541,20 +569,44 @@ bool ofxKinect4Windows::startSkeletonStream( bool seated )
 
 		bUsingSkeletons = true;
 		return true;
-	} else {
-		ofLog() << " startSkeletonStream() cannot initialize stream " << endl;
-		return false;
-	}
-	return true;
+	} 
+
+	ofLogError("ofxKinect4Windows::initSkeletonStream") << "cannot initialize stream";
+	return false;
 }
 
+//----------------------------------------------------------
 bool ofxKinect4Windows::start()
 {
+	if(bStarted){
+		ofLogError("ofxKinect4Windows::start") << "Stream already started";
+		return false;
+	}
+
+	if(hKinect == NULL){
+		cout << "init sensor" << endl;
+		initSensor();
+	}
+
+	if(!bInited){
+		cout << "init stuff" << endl;
+
+		initColorStream(640,480);
+		initDepthStream(320,240);
+	}
+
 	startThread(true, false);
-	bGrabberInited = true;
+	bStarted = true;	
 	return true;
 }
 
+//----------------------------------------------------------
+void ofxKinect4Windows::stop() {
+	if(bStarted){
+		waitForThread(true);
+		bStarted = false;
+	}
+}	
 
 //----------------------------------------------------------
 void ofxKinect4Windows::threadedFunction(){
