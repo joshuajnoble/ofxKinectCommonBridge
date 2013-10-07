@@ -136,7 +136,7 @@ bool ofxKinect4Windows::simpleInit()
 		if(bUseTexture){
 
 			if(bProgrammableRenderer ) {
-				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R16);
 				depthTex.setRGToRGBASwizzles(true);
 			} else {
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
@@ -229,10 +229,12 @@ void ofxKinect4Windows::update(){
 		if(bUseTexture) {
 			//depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 			if( bProgrammableRenderer ) {
-				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);
+				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_RED);
+				rawDepthTex.loadData(depthPixelsRaw.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_RED);
 				//depthTex.setRGToRGBASwizzles(true);
 			} else {
 				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+				rawDepthTex.loadData(depthPixelsRaw.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
 			}
 		}
 
@@ -265,9 +267,7 @@ void ofxKinect4Windows::update(){
 				}
 
 				bNeedsUpdateSkeleton = true;
-
 			}
-
 		}
 
 	} else {
@@ -278,19 +278,10 @@ void ofxKinect4Windows::update(){
 //----------------------------------------------------------
 void ofxKinect4Windows::updateDepthPixels() {
 
-	if(bProgrammableRenderer) {
-
-		for(int i = 0; i < depthPixelsRaw.getWidth()*depthPixelsRaw.getHeight(); i++ ) {
-			float dval = ofClamp(depthPixelsRaw[i] >> 7, 0, depthLookupTable.size()-1);
-			depthPixels[i * 3] = dval;
-			depthPixels[i * 3 +1] = dval;
-			depthPixels[i * 3 +2] = dval;
-		}
-
-	} else {
-		for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
-			depthPixels[i] = ofClamp(depthPixelsRaw[i] >> 7, 0, depthLookupTable.size()-1);
-		}
+	for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) 
+	{
+		depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[i] >> 4, 0, depthLookupTable.size()-1 ) ];
+		depthPixelsRaw[i] = depthPixelsRaw[i] >> 4;
 	}
 }
 
@@ -413,8 +404,11 @@ bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
 		ofLog() << "allocating a buffer of size " << depthFormat.dwWidth*depthFormat.dwHeight*sizeof(unsigned short) << " when k4w wants size " << depthFormat.cbBufferSize << endl;
 		
 		if(bProgrammableRenderer) {
-			depthPixels.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
-			depthPixelsBack.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
+			//depthPixels.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
+			//depthPixelsBack.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
+
+			depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_COLOR);
+			depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_COLOR);
 		} else {
 			depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 			depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
@@ -429,11 +423,15 @@ bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
 				//int w, int h, int glInternalFormat, bool bUseARBExtention, int glFormat, int pixelType
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);//, true, GL_R8, GL_UNSIGNED_BYTE);
 				depthTex.setRGToRGBASwizzles(true);
+
+				rawDepthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R16);//, true, GL_R8, GL_UNSIGNED_BYTE);
+				rawDepthTex.setRGToRGBASwizzles(true);
 				//depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
 			}
 			else
 			{
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
+				rawDepthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
 			}
 		}
 	} 

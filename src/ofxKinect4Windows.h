@@ -85,6 +85,10 @@ class ofxKinect4Windows : protected ofThread {
 
 	vector<Skeleton> &getSkeletons();
 
+	ofTexture &getRawDepthTexture() {
+		return rawDepthTex;
+	}
+
 	ofTexture &getDepthTexture() {
 		return depthTex;
 	}
@@ -117,6 +121,7 @@ class ofxKinect4Windows : protected ofThread {
 
   	bool bUseTexture;
 	ofTexture depthTex; ///< the depth texture
+	ofTexture rawDepthTex; ///<
 	ofTexture videoTex; ///< the RGB texture
 	ofTexture irTex;
 
