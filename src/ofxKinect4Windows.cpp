@@ -170,7 +170,7 @@ bool ofxKinect4Windows::isNewSkeleton() {
 	return bNeedsUpdateSkeleton;
 }
 
-vector<Skeleton> ofxKinect4Windows::getSkeletons() 
+vector<Skeleton> &ofxKinect4Windows::getSkeletons() 
 {
 	return skeletons;
 }
@@ -205,6 +205,8 @@ void ofxKinect4Windows::update(){
 			{
 				if( bProgrammableRenderer ) {
 					// programmable renderer likes this
+					// TODO
+					// swizzle this to rgb & a -> GL_ONE
 					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_BGRA);
 				} else {
 					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
@@ -227,7 +229,7 @@ void ofxKinect4Windows::update(){
 		if(bUseTexture) {
 			//depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 			if( bProgrammableRenderer ) {
-				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
+				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);
 				//depthTex.setRGToRGBASwizzles(true);
 			} else {
 				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
@@ -425,9 +427,9 @@ bool ofxKinect4Windows::startDepthStream( int width, int height, bool nearMode )
 			if(bProgrammableRenderer)
 			{
 				//int w, int h, int glInternalFormat, bool bUseARBExtention, int glFormat, int pixelType
-				//depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8, true, GL_R8, GL_UNSIGNED_BYTE);
-				//depthTex.setRGToRGBASwizzles(true);
-				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);//, true, GL_R8, GL_UNSIGNED_BYTE);
+				depthTex.setRGToRGBASwizzles(true);
+				//depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
 			}
 			else
 			{

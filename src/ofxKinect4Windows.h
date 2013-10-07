@@ -83,7 +83,7 @@ class ofxKinect4Windows : protected ofThread {
 
 	void drawIR( float x, float y, float w, float h );
 
-	vector<Skeleton> getSkeletons();
+	vector<Skeleton> &getSkeletons();
 
 	ofTexture &getDepthTexture() {
 		return depthTex;
