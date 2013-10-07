@@ -127,7 +127,7 @@ bool ofxKinect4Windows::simpleInit()
 		if(bUseTexture){
 
 			if(bProgrammableRenderer ) {
-				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R16);
+				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);
 				depthTex.setRGToRGBASwizzles(true);
 			} else {
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
@@ -167,7 +167,6 @@ vector<Skeleton> &ofxKinect4Windows::getSkeletons() {
 }
 
 /// updates the pixel buffers and textures
-///
 /// make sure to call this to update to the latest incoming frames
 void ofxKinect4Windows::update(){
 	if(!bStarted) {
@@ -221,7 +220,6 @@ void ofxKinect4Windows::update(){
 			if( bProgrammableRenderer ) {
 				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_RED);
 				rawDepthTex.loadData(depthPixelsRaw.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_RED);
-				//depthTex.setRGToRGBASwizzles(true);
 			} else {
 				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 				rawDepthTex.loadData(depthPixelsRaw.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
@@ -254,7 +252,6 @@ void ofxKinect4Windows::update(){
 					SkeletonBone bone( k4wSkeletons.SkeletonData[i].SkeletonPositions[j], bones[j] );
 					( skeletons.begin())->insert( std::pair<NUI_SKELETON_POSITION_INDEX, SkeletonBone>( NUI_SKELETON_POSITION_INDEX(j), bone ) );
 				}
-
 				bNeedsUpdateSkeleton = true;
 			}
 		}
@@ -447,8 +444,11 @@ bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);//, true, GL_R8, GL_UNSIGNED_BYTE);
 				depthTex.setRGToRGBASwizzles(true);
 
-				rawDepthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R16);//, true, GL_R8, GL_UNSIGNED_BYTE);
+				//rawDepthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R16, true, GL_RED, GL_UNSIGNED_SHORT);
+				rawDepthTex.allocate(depthPixelsRaw, true);
 				rawDepthTex.setRGToRGBASwizzles(true);
+
+				cout << rawDepthTex.getWidth() << " " << rawDepthTex.getHeight() << endl;
 				//depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
 			}
 			else
