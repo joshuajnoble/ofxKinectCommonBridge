@@ -2,21 +2,11 @@
 
 SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient) {
 
-	/*mAbsRotQuat	= toQuatf( bone.absoluteRotation.rotationQuaternion );
-	mAbsRotMat	= toMatrix44f( bone.absoluteRotation.rotationMatrix );
-	mJointEnd	= bone.endJoint;
-	mJointStart	= bone.startJoint;
-	mPosition	= toVec3f( position );
-	mRotQuat	= toQuatf( bone.hierarchicalRotation.rotationQuaternion );
-	mRotMat		= toMatrix44f( bone.hierarchicalRotation.rotationMatrix );*/
-
 	cameraRotation.set( orient.absoluteRotation.rotationMatrix.M11, orient.absoluteRotation.rotationMatrix.M12, orient.absoluteRotation.rotationMatrix.M13, orient.absoluteRotation.rotationMatrix.M14,
 		orient.absoluteRotation.rotationMatrix.M21, orient.absoluteRotation.rotationMatrix.M22, orient.absoluteRotation.rotationMatrix.M23, orient.absoluteRotation.rotationMatrix.M24,
 		orient.absoluteRotation.rotationMatrix.M31, orient.absoluteRotation.rotationMatrix.M32, orient.absoluteRotation.rotationMatrix.M33, orient.absoluteRotation.rotationMatrix.M34,
 		orient.absoluteRotation.rotationMatrix.M41, orient.absoluteRotation.rotationMatrix.M42, orient.absoluteRotation.rotationMatrix.M43, orient.absoluteRotation.rotationMatrix.M44);
 
-	//NUI_SKELETON_BONE_ROTATION
-	//cout << inPosition.x << " " << inPosition.y << " " << inPosition.z << endl;
 	position.set( inPosition.x, inPosition.y, inPosition.z );
 
 	NuiTransformSkeletonToDepthImage(inPosition, &(screenPosition.x), &(screenPosition.y), NUI_IMAGE_RESOLUTION_640x480);
@@ -61,8 +51,6 @@ const ofVec3f& SkeletonBone::getScreenPosition() const
 {
 	return screenPosition;
 }
-
-
 
 ofxKinect4Windows::ofxKinect4Windows(){
 	bIsFrameNewVideo = false;
@@ -326,6 +314,28 @@ void ofxKinect4Windows::draw(const ofPoint & point) {
 //----------------------------------------------------------
 void ofxKinect4Windows::draw(const ofRectangle & rect) {
 	draw(rect.x, rect.y, rect.width, rect.height);
+}
+
+//----------------------------------------------------------
+void ofxKinect4Windows::drawRawDepth(float _x, float _y, float _w, float _h) {
+	if(bUseTexture) {
+		rawDepthTex.draw(_x, _y, _w, _h);
+	}
+}
+
+//----------------------------------------------------------
+void ofxKinect4Windows::drawRawDepth(float _x, float _y) {
+	drawRawDepth(_x, _y, (float)colorFormat.dwWidth, (float)colorFormat.dwHeight);
+}
+
+//----------------------------------------------------------
+void ofxKinect4Windows::drawRawDepth(const ofPoint & point) {
+	drawRawDepth(point.x, point.y);
+}
+
+//----------------------------------------------------------
+void ofxKinect4Windows::drawRawDepth(const ofRectangle & rect) {
+	drawRawDepth(rect.x, rect.y, rect.width, rect.height);
 }
 
 //----------------------------------------------------------

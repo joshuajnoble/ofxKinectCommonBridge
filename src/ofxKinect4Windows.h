@@ -76,6 +76,12 @@ class ofxKinect4Windows : protected ofThread {
 	void draw(const ofRectangle& rect);
 
 	/// draw the grayscale depth texture
+	void drawRawDepth(float x, float y, float w, float h);
+	void drawRawDepth(float x, float y);
+	void drawRawDepth(const ofPoint& point);
+	void drawRawDepth(const ofRectangle& rect);
+
+	/// draw the grayscale depth texture
 	void drawDepth(float x, float y, float w, float h);
 	void drawDepth(float x, float y);
 	void drawDepth(const ofPoint& point);
