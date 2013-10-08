@@ -19,5 +19,7 @@ void main()
 {
 	colorVarying = color;
 	texCoordVarying = (textureMatrix*vec4(texcoord.x,texcoord.y,0,1)).xy;
+	// replacement for normal = normalize(gl_NormalMatrix * gl_Normal);
+	normalVarying = normalize( transpose(inverse(modelViewMatrix)) * vec4(normal, 1.0));
 	gl_Position = modelViewProjectionMatrix * position;
 }

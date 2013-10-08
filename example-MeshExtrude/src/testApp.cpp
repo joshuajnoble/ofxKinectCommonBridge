@@ -21,16 +21,16 @@ void testApp::setup(){
 	// set the size to be 2 units.
 	tmpBox.set(10);
 	
-	for( int i = 0; i < 60; i++ ) {
-		for( int j = 0; j < 60; j++) {
+	for( int i = 0; i < 64; i++ ) {
+		for( int j = 0; j < 48; j++) {
 
 			ofBoxPrimitive b2 = tmpBox;
 
 			for( int k = 0; k < b2.getMesh().getVertices().size(); k++ ) 
 			{
 
-				b2.getMesh().getVerticesPointer()[k].set( b2.getMesh().getVertex(k).x + (i * 14), 
-														  b2.getMesh().getVertex(k).y + (j * 12), 
+				b2.getMesh().getVerticesPointer()[k].set( b2.getMesh().getVertex(k).x + (i * 16), 
+														  b2.getMesh().getVertex(k).y + (j * 14), 
 														  b2.getMesh().getVertex(k).z);
 
 			}
@@ -69,7 +69,7 @@ void testApp::setup(){
 	kinect.initSensor( 0 );
 	
 	kinect.initColorStream(640, 480);
-	kinect.initDepthStream(640, 480, true);
+	kinect.initDepthStream(320, 240, false);
 
 	kinect.start();
 	
@@ -95,6 +95,8 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw()
 {
+	ofMatrix4x4 camTextureMatrix;
+
 	//ofEnableDepthTest();
 	glClear(GL_DEPTH_BUFFER_BIT );
 	fbo.begin();
@@ -107,6 +109,7 @@ void testApp::draw()
 	
 	ofSetColor(ofColor::white);
 	mCamMain.begin();
+
 	// bind the shader
 	depthDisplace.begin();
 	// give the shader access to our texture
@@ -130,6 +133,7 @@ void testApp::draw()
 	rayShader.setUniformTexture("dtex", fbo.getDepthTexture(), 2);
 	//rayShader.setUniform2f("lightPositionOnScreen", mouseX, mouseY);
 
+	rayShader.setUniformMatrix4f("camModelViewProjectionMatrix", mCamMain.getModelViewProjectionMatrix() );
 	rayShader.setUniform1f("exposure", exposureSlider );
 	rayShader.setUniform1f("decay", decaySlider);
 	rayShader.setUniform1f("density", densitySlider);
@@ -145,7 +149,11 @@ void testApp::draw()
 	//fbo.draw(0,0);
 	rayShader.end();
 
+	ofEnableAlphaBlending();
+
 	gui.draw();
+
+	ofDisableAlphaBlending();
 
 //	ofEnableAlphaBlending();
 //	fbo.getDepthTexture().draw(0,0);
@@ -167,12 +175,10 @@ void testApp::keyReleased(int key){
 	
 	switch (key) {
 		case ' ':
-			isShaderDirty = true;
-			// mark the shader as dirty - this will reload the shader.
-			break;
-		case 'f':
-			ofToggleFullscreen();
-			break;
+			//mCamMain.setPosition(512, 384, 800)
+			mCamMain.reset();
+			mCamMain.setDistance(800);
+			mCamMain.setPosition(512, 384, 800);
 		default:
 			break;
 	}
