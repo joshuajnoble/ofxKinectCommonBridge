@@ -11,14 +11,14 @@ class SkeletonBone
 public:
 	// lots of constness because we're putting these in a map and that
 	// copies stuff all over the place
-	const ofQuaternion getCameraRotation() const;
-	const ofMatrix4x4 getCameraRotationMatrix() const;
-	int getEndJoint() const;
-	const ofVec3f& getStartPosition() const;
-	const ofVec3f& getScreenPosition() const;
-	const ofQuaternion&	getRotation() const;
-	const ofMatrix4x4& getRotationMatrix() const;
-	const int getStartJoint() const;
+	const ofQuaternion getCameraRotation();
+	const ofMatrix4x4 getCameraRotationMatrix();
+	int getEndJoint();
+	const ofVec3f& getStartPosition();
+	const ofVec3f& getScreenPosition();
+	const ofQuaternion&	getRotation();
+	const ofMatrix4x4& getRotationMatrix();
+	const int getStartJoint();
 	SkeletonBone( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& bone );
 
 private:
@@ -133,10 +133,10 @@ class ofxKinect4Windows : protected ofThread {
 	ofShortPixels depthPixelsRaw;
 	ofShortPixels depthPixelsRawBack;	///< depth back
 
-	//ofShortPixels irPixelsRaw;
-	//ofShortPixels irPixelsBackRaw;
-	//ofPixels irPixels;
-	//ofPixels irPixelsBack;
+	ofShortPixels irPixelsRaw;
+	ofShortPixels irPixelsBackRaw;
+	ofPixels irPixels;
+	ofPixels irPixelsBack;
 
 	bool bIsFrameNewVideo;
 	bool bNeedsUpdateVideo;
@@ -146,9 +146,11 @@ class ofxKinect4Windows : protected ofThread {
 	bool bIsSkeletonFrameNew;
 	bool bProgrammableRenderer;
 
-	bool bIsVideoInfrared;
+	bool bVideoIsInfrared;
 	bool bUsingSkeletons;
 	bool bUsingDepth;
+
+	BYTE *irPixelByteArray;
 
 	void threadedFunction();
 

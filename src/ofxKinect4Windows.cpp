@@ -18,36 +18,35 @@ SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE
 	
 }
 
-const ofVec3f& SkeletonBone::getStartPosition() const {
+const ofVec3f& SkeletonBone::getStartPosition() {
 	return position;
 }
 
-const ofQuaternion&	SkeletonBone::getRotation() const {
+const ofQuaternion&	SkeletonBone::getRotation() {
 	return rotation.getRotate();
 }
 
-const ofMatrix4x4& SkeletonBone::getRotationMatrix() const {
+const ofMatrix4x4& SkeletonBone::getRotationMatrix() {
 	return rotation;
 }
 
-const int SkeletonBone::getStartJoint() const {
+const int SkeletonBone::getStartJoint() {
 	return startJoint;
 }
 
-const ofQuaternion SkeletonBone::getCameraRotation() const		{
+const ofQuaternion SkeletonBone::getCameraRotation() {
 	return cameraRotation.getRotate();
 }
 
-const ofMatrix4x4 SkeletonBone::getCameraRotationMatrix() const {
+const ofMatrix4x4 SkeletonBone::getCameraRotationMatrix() {
 	return rotation;
 }
 
-int SkeletonBone::getEndJoint() const {
+int SkeletonBone::getEndJoint() {
 	return endJoint;
 }
 
-const ofVec3f& SkeletonBone::getScreenPosition() const
-{
+const ofVec3f& SkeletonBone::getScreenPosition() {
 	return screenPosition;
 }
 
@@ -58,7 +57,7 @@ ofxKinect4Windows::ofxKinect4Windows(){
 	bNeedsUpdateVideo = false;
 	bIsFrameNewDepth = false;
 	bNeedsUpdateDepth = false;
-	bIsVideoInfrared = false;
+	bVideoIsInfrared = false;
 	bInited = false;
 	bStarted = false;
 
@@ -168,8 +167,10 @@ vector<Skeleton> &ofxKinect4Windows::getSkeletons() {
 
 /// updates the pixel buffers and textures
 /// make sure to call this to update to the latest incoming frames
-void ofxKinect4Windows::update(){
-	if(!bStarted) {
+void ofxKinect4Windows::update()
+{
+	if(!bStarted)
+	{
 		ofLogError("ofxKinect4Windows::update") << "Grabber not started";
 		return;
 	}
@@ -177,17 +178,17 @@ void ofxKinect4Windows::update(){
 	if(bNeedsUpdateVideo)
 	{
 		bIsFrameNewVideo = true;
+
 		swap(videoPixels,videoPixelsBack);
 		bNeedsUpdateVideo = false;
 
 		if(bUseTexture) {
-			if(bIsVideoInfrared) 
+			if(bVideoIsInfrared) 
 			{
 				if(bProgrammableRenderer){
 					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_RED);
-				}
-				else{
-					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
+				} else {
+					videoTex.loadData(videoPixels.getPixels(), colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE16);
 				}
 			} 
 			else 
@@ -271,9 +272,9 @@ void ofxKinect4Windows::updateDepthPixels() {
 
 //------------------------------------
 void ofxKinect4Windows::updateIRPixels() {
-	//for(int i = 0; i < irPixels.getWidth()*irPixels.getHeight(); i++) {
-	//	irPixels[i] =  ofClamp(irPixels[i] >> 1, 0, 255 );
-	//}
+	for(int i = 0; i < irPixels.getWidth()*irPixels.getHeight(); i++) {
+		irPixels[i] =  ofClamp(irPixels[i] >> 1, 0, 255 );
+	}
 }
 
 //------------------------------------
@@ -414,7 +415,7 @@ bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
 	if( SUCCEEDED( KinectEnableDepthStream(hKinect, nearMode, res, &df) ) ){
 //		pDepthBuffer = new BYTE[depthFormat.cbBufferSize];
 		depthFormat = df;
-		ofLog() << "allocating a buffer of size " << depthFormat.dwWidth*depthFormat.dwHeight*sizeof(unsigned short) << " when k4w wants size " << depthFormat.cbBufferSize << endl;
+		//ofLog() << "allocating a buffer of size " << depthFormat.dwWidth*depthFormat.dwHeight*sizeof(unsigned short) << " when k4w wants size " << depthFormat.cbBufferSize << endl;
 		
 		if(bProgrammableRenderer) {
 			//depthPixels.allocate(depthFormat.dwWidth * 3, depthFormat.dwHeight * 3, OF_IMAGE_COLOR);
@@ -503,7 +504,7 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 		return false;
 	}
 
-	bIsVideoInfrared = true;
+	bVideoIsInfrared = true;
 
 	_NUI_IMAGE_RESOLUTION res;
 	if( width == 320 ) {
@@ -518,19 +519,18 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 
 	KINECT_IMAGE_FRAME_FORMAT cf = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
 
-
 	if( SUCCEEDED(KinectEnableIRStream(hKinect, res, &cf)) )
 	{
-		//BYTE* pColorBuffer = new BYTE[format.cbBufferSize];
+		// IR is two byte, but we can't use shortPixels so we'll make a raw array and put it together
+		// in the update() method. Probably should be changed in future versions
 		colorFormat = cf;
-		//cout << "allocating a buffer of size " << colorFormat.dwWidth*colorFormat.dwHeight*sizeof(unsigned char)*4 << " when k4w wants size " << colorFormat.cbBufferSize << endl;
-		
-		cout << colorFormat.dwWidth << " " << colorFormat.dwHeight << endl;
-		
-		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_GRAYSCALE);
-		if(bUseTexture){
+		irPixelByteArray = new BYTE[colorFormat.cbBufferSize];
 
+		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+
+		if(bUseTexture)
+		{
 			if(bProgrammableRenderer){
 				videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_R8);
 				videoTex.setRGToRGBASwizzles(true);
@@ -539,11 +539,11 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 				videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_LUMINANCE);
 			}
 		}
-	}
-	else{
+	} else {
 		ofLogError("ofxKinect4Windows::open") << "Error opening color stream";
 		return false;
 	}
+
 	bInited = true;
 	return true;
 }
@@ -560,11 +560,10 @@ bool ofxKinect4Windows::initSkeletonStream( bool seated )
 		//cout << " we have skeletons " << endl;
 
 		//vector<Skeleton>::iterator skelIt = skeletons.begin();
-		for( int i = 0; i < NUI_SKELETON_COUNT; i++ )  {
-
+		for( int i = 0; i < NUI_SKELETON_COUNT; i++ )
+		{
 			Skeleton s;
 			skeletons.push_back(s);
-
 		}
 
 		bUsingSkeletons = true;
@@ -620,7 +619,7 @@ void ofxKinect4Windows::threadedFunction(){
 	while(isThreadRunning()) {
 		alignToDepth = !alignToDepth; // flip depth alignment every get - strobing
 		//KinectGetColorFrame( _In_ HKINECT hKinect, ULONG cbBufferSize, _Out_cap_(cbBufferSize) BYTE* pColorBuffer, _Out_opt_ LONGLONG* liTimeStamp );
-        if( SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
+        if( KinectIsDepthFrameReady(hKinect) && SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
 		{
 			bNeedsUpdateDepth = true;
 			//printf("depth Timestamp: %d\r\n", timestamp);
@@ -628,14 +627,33 @@ void ofxKinect4Windows::threadedFunction(){
 
 		// KinectGetDepthFrame( _In_ HKINECT hKinect, ULONG cbBufferSize, _Out_cap_(cbBufferSize) BYTE* pDepthBuffer, _Out_opt_ LONGLONG* liTimeStamp );
 
-		if( SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, videoPixelsBack.getPixels(), &timestamp) ) )
+		//cout << colorFormat.cbBufferSize << endl;
+
+		if(bVideoIsInfrared)
 		{
-			bNeedsUpdateVideo = true;
-			// ProcessColorFrameData(&format, pColorBuffer);
+			if(  KinectIsColorFrameReady(hKinect) && SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, irPixelByteArray, &timestamp) ) )
+			{
+				bNeedsUpdateVideo = true;
+				
+				for (int i = 0; i < colorFormat.dwWidth * colorFormat.dwHeight; i++)
+				{
+					//videoPixelsBack.getPixels()[i] = reinterpret_cast<USHORT*>(irPixelByteArray)[i] >> 8;
+					videoPixelsBack.getPixels()[i] = irPixelByteArray[i];
+				}
+
+			}
+		}
+		else
+		{
+			if( SUCCEEDED( KinectGetColorFrame(hKinect, colorFormat.cbBufferSize, videoPixelsBack.getPixels(), &timestamp) ) )
+			{
+				bNeedsUpdateVideo = true;
+				// ProcessColorFrameData(&format, pColorBuffer);
+			}
 		}
 
 		if(bUsingSkeletons) {
-			if( SUCCEEDED ( KinectGetSkeletonFrame(hKinect, &k4wSkeletons )) ) 
+			if( KinectIsSkeletonFrameReady(hKinect) && SUCCEEDED ( KinectGetSkeletonFrame(hKinect, &k4wSkeletons )) ) 
 			{
 				bNeedsUpdateSkeleton = true;
 			}

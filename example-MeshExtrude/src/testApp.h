@@ -36,9 +36,6 @@ public:
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
-
-	void testApp::addFace(ofMesh& mesh, ofVec3f a, ofVec3f b, ofVec3f c);
-	void addFace(ofMesh& mesh, ofVec3f a, ofVec3f b, ofVec3f c, ofVec3f d);
 	
 	ofxKinect4Windows kinect;
 	ofImage raysTexture;
