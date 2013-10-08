@@ -3,10 +3,6 @@
 uniform vec2      resolution;           // viewport resolution (in pixels)
 uniform float     time;           // shader playback time (in seconds)
 
-uniform vec2 pp1;
-uniform vec2 pp2;
-uniform vec2 pp3;
-
 in float depth;
 in vec4 colorVarying;
 in vec2 texCoordVarying;
@@ -17,22 +13,22 @@ uniform float frequency;
 uniform float scalar;
 uniform float blobDensity;
 
-uniform vec2 headPoint;
-uniform vec2 rHandPoint;
-uniform vec2 lHandPoint;
+uniform vec3 headPoint;
+uniform vec3 rHandPoint;
+uniform vec3 lHandPoint;
 
 uniform sampler2DRect videoTex;
 
-float makePoint(float x,float y,float fx,float fy,float sx,float sy,float t){
+float makePoint( float x, float y, float fx, float fy, float sx, float sy, float scale, float freq)
+{
+    float fsx = fx * freq;
+    float fsy = fy * freq;
 
-    float fsx = fx * frequency;
-    float fsy = fy * frequency;
+    float ssx = sx * scale;
+    float ssy = sy * scale;
 
-    float ssx = sx * scalar;
-    float ssy = sy * scalar;
-
-   float xx=x+(sin(t*fsx)*ssx);
-   float yy=y+(cos(t*fsy)*ssy);
+   float xx=x+(sin(time*fsx)*ssx);
+   float yy=y+(cos(time*fsy)*ssy);
    return 1.0/sqrt(xx*xx+yy*yy);
 }
 
@@ -40,57 +36,48 @@ void main( void ) {
 
    vec2 tp = (texCoordVarying.xy/resolution.x) * 2.0 - vec2(1.0,resolution.y/resolution.x);
 
-   vec2 p=tp+headPoint;
-   vec2 p1=tp+lHandPoint;
-   vec2 p2=tp+rHandPoint;
-   
-   float x=p.x;
-   float y=p.y;
+   vec2 hp=tp+headPoint.xy;
+   vec2 lp=tp+lHandPoint.xy;
+   vec2 rp=tp+rHandPoint.xy;
 
-   float x1=p1.x;
-   float y1=p1.y;
+   float r = makePoint(rp.x,rp.y,1.3,2.9,0.3,0.3,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,1.9,2.0,0.4,0.4, rHandPoint.z , 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,0.8,0.7,0.4,0.5,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,2.3,0.1,0.6,0.3,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,0.8,1.7,0.5,0.4,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,0.3,1.0,0.4,0.4,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,1.4,1.7,0.4,0.5,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,1.3,2.1,0.6,0.3,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));
+   r=r+makePoint(rp.x,rp.y,1.8,1.7,0.5,0.4,rHandPoint.z, 3.0 - (rHandPoint.z * 3.0));  
 
-   float x2=p2.x;
-   float y2=p2.y;
+      float g = makePoint(hp.x,hp.y,1.2,1.9,0.3,0.3,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,0.7,2.7,0.4,0.4,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,1.4,0.6,0.4,0.5,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,2.6,0.4,0.6,0.3,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,0.7,1.4,0.5,0.4,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,0.7,1.7,0.4,0.4,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,0.8,0.5,0.4,0.5,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,1.4,0.9,0.6,0.3,headPoint.z, 3.0 - (headPoint.z * 3.0));
+   g=g+makePoint(hp.x,hp.y,0.7,1.3,0.5,0.4,headPoint.z, 3.0 - (headPoint.z * 3.0));
 
-   float r = makePoint(x2,y2,1.3,2.9,0.3,0.3,time);
-   r=r+makePoint(x2,y2,1.9,2.0,0.4,0.4,time);
-   r=r+makePoint(x2,y2,0.8,0.7,0.4,0.5,time);
-   r=r+makePoint(x2,y2,2.3,0.1,0.6,0.3,time);
-   r=r+makePoint(x2,y2,0.8,1.7,0.5,0.4,time);
-   r=r+makePoint(x2,y2,0.3,1.0,0.4,0.4,time);
-   r=r+makePoint(x2,y2,1.4,1.7,0.4,0.5,time);
-   r=r+makePoint(x2,y2,1.3,2.1,0.6,0.3,time);
-   r=r+makePoint(x2,y2,1.8,1.7,0.5,0.4,time);  
-   
-   float g = makePoint(x,y,1.2,1.9,0.3,0.3,time);
-   g=g+makePoint(x,y,0.7,2.7,0.4,0.4,time);
-   g=g+makePoint(x,y,1.4,0.6,0.4,0.5,time);
-   g=g+makePoint(x,y,2.6,0.4,0.6,0.3,time);
-   g=g+makePoint(x,y,0.7,1.4,0.5,0.4,time);
-   g=g+makePoint(x,y,0.7,1.7,0.4,0.4,time);
-   g=g+makePoint(x,y,0.8,0.5,0.4,0.5,time);
-   g=g+makePoint(x,y,1.4,0.9,0.6,0.3,time);
-   g=g+makePoint(x,y,0.7,1.3,0.5,0.4,time);
-
-   float b = makePoint(x1,y1,1.7,0.3,0.3,0.3,time);
-   b=b+makePoint(x1,y1,1.9,1.3,0.4,0.4,time);
-   b=b+makePoint(x1,y1,0.8,0.9,0.4,0.5,time);
-   b=b+makePoint(x1,y1,1.2,1.7,0.6,0.3,time);
-   b=b+makePoint(x1,y1,0.3,0.6,0.5,0.4,time);
-   b=b+makePoint(x1,y1,0.3,0.3,0.4,0.4,time);
-   b=b+makePoint(x1,y1,1.4,0.8,0.4,0.5,time);
-   b=b+makePoint(x1,y1,0.2,0.6,0.6,0.3,time);
-   b=b+makePoint(x1,y1,1.3,0.5,0.5,0.4,time);
+     float b = makePoint(lp.x,lp.y,1.7,0.3,0.3,0.3,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,1.9,1.3,0.4,0.4,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,0.8,0.9,0.4,0.5,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,1.2,1.7,0.6,0.3,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,0.3,0.6,0.5,0.4,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,0.3,0.3,0.4,0.4,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,1.4,0.8,0.4,0.5,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,0.2,0.6,0.6,0.3,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
+   b=b+makePoint(lp.x,lp.y,1.3,0.5,0.5,0.4,lHandPoint.z, 3.0 - (lHandPoint.z * 3.0));
 
    vec3 d=vec3(r,g,b) / (64.0 * blobDensity);
    
    vec4 blobColor = vec4(d.x,d.y,d.z,1.0);
    float interp = (d.x + d.y + d.z)/3.0;
 
-   fragColor = blobColor;
-   vec2 videoScaling = vec2(640/1024, 640/768);
+   vec2 videoScaling = vec2(640.0/1024.0, 480.0/768.0);
 
-   //fragColor = mix( texture(videoTex, texCoordVarying * videoScaling), blobColor, interp);
-   //fragColor = texture(videoTex, texCoordVarying.xy);
+   vec4 vidColor = vec4(texture(videoTex, texCoordVarying.xy * videoScaling).rgb, 1.0);
+   fragColor = mix( vidColor, blobColor, interp);
+   //fragColor = vec4(texture(videoTex, texCoordVarying.xy * videoScaling).rgb, 1.0);
 }

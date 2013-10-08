@@ -27,6 +27,7 @@ class testApp : public ofBaseApp{
 		ofVec3f head, lHand, rHand;
 		bool hasSkeleton;
 
+		float jointDistance;
 		ofxPanel gui;
 
 		ofxFloatSlider p1, p2, p3, p4, p5, p6;

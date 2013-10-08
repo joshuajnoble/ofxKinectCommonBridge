@@ -11,7 +11,7 @@ void testApp::setup(){
 
 	kinect.start();
 
-	shader.load("shaders/k4w.vert", "shaders/blobs.fs");
+	shader.load("shaders/blobs.vs", "shaders/blobs.fs");
 
 	GLint err = glGetError();
 	if (err != GL_NO_ERROR){
@@ -32,6 +32,8 @@ void testApp::setup(){
 	gui.add(p5.setup("frequency", 0.18, 0.0, 2.0));
 	gui.add(p6.setup("scalar", 2.5, -1.0, 3.0));
 
+	jointDistance = 1.f;
+
 }
 
 //--------------------------------------------------------------
@@ -50,11 +52,19 @@ void testApp::update()
 				SkeletonBone headBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HEAD)->second;
 				SkeletonBone lHandBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HAND_LEFT)->second;
 				SkeletonBone rHandBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HAND_RIGHT)->second;
-				head = head.getInterpolated( ofVec3f( headBone.getScreenPosition().x, headBone.getScreenPosition().y, headBone.getScreenPosition().z ), 0.5);
+				head = head.getInterpolated( ofVec3f( headBone.getScreenPosition().x, headBone.getScreenPosition().y, 0 ), 0.5);
+				head.z =  fabs(ofInterpolateCosine( head.z, headBone.getStartPosition().x, 0.5)) + 0.1;
 				lHand = lHand.getInterpolated( ofVec3f(lHandBone.getScreenPosition().x, lHandBone.getScreenPosition().y, lHandBone.getScreenPosition().z), 0.5);
+				lHand.z = ofInterpolateCosine( lHand.z, lHandBone.getStartPosition().x, 0.5);
 				rHand = rHand.getInterpolated( ofVec3f(rHandBone.getScreenPosition().x, rHandBone.getScreenPosition().y, rHandBone.getScreenPosition().z), 0.5);
+				rHand.z = ofInterpolateCosine( rHand.z, rHandBone.getStartPosition().x, 0.5);
 
-				cout << head << " " << lHand << " " << rHand << endl;
+				jointDistance = head.distance(rHand);
+				jointDistance += lHand.distance(rHand);
+				jointDistance += lHand.distance(head);
+
+				//cout << head << " " << lHand << " " << rHand << endl;
+				cout << jointDistance << " " ;
 
 				hasSkeleton = true;
 
@@ -67,6 +77,8 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw(){
 
+	ofDisableAlphaBlending();
+
 	ofPushMatrix();
 	ofTranslate(512, 768/2);
 	
@@ -78,18 +90,18 @@ void testApp::draw(){
 	if(hasSkeleton)
 	{
 		
-		shader.setUniform2f("headPoint", 1.0 + (head.x/-320), 1.0 + (head.y/-240));
-		shader.setUniform2f("lHandPoint", 1.0 + (lHand.x/-320), 1.0 + (lHand.y/-240));
-		shader.setUniform2f("rHandPoint", 1.0 + (rHand.x/-320), 1.0 + (rHand.y/-240));
+		shader.setUniform3f("headPoint", 1.0 + (head.x/-320), 1.0 + (head.y/-240) - 0.1, head.z);
+		shader.setUniform3f("lHandPoint", 1.0 + (lHand.x/-320), 1.0 + (lHand.y/-240), lHand.z);
+		shader.setUniform3f("rHandPoint", 1.0 + (rHand.x/-320), 1.0 + (rHand.y/-240), rHand.z);
 		shader.setUniform1f("frequency", p4);
 		shader.setUniform1f("scalar", p5);
-		shader.setUniform1f("blobDensity", p6);
+		shader.setUniform1f("blobDensity", jointDistance/600.0);
 
 	} else {
 
-		shader.setUniform2f("headPoint", p1, p1);
-		shader.setUniform2f("lHandPoint", p2, p2);
-		shader.setUniform2f("rHandPoint", p3, p3);
+		shader.setUniform3f("headPoint", p1, p1, p1);
+		shader.setUniform3f("lHandPoint", p2, p2, p2);
+		shader.setUniform3f("rHandPoint", p3, p3, p3);
 		shader.setUniform1f("frequency", p4);
 		shader.setUniform1f("scalar", p5);
 		shader.setUniform1f("blobDensity", p6);
