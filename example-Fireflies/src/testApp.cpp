@@ -1,6 +1,7 @@
 #include "testApp.h"
 
-//--------------------------------------------------------------
+
+
 void testApp::setup(){
 
 	kinect.initSensor( 0 );
@@ -11,7 +12,11 @@ void testApp::setup(){
 
 	kinect.start();
 
+#ifdef USE_PROGRAMMABLE_RENDERER
 	shader.load("shaders/blobs.vs", "shaders/blobs.fs");
+#else
+	shader.load("shaders/blobs_gl2.vs", "shaders/blobs_gl2.fs");
+#endif
 
 	GLint err = glGetError();
 	if (err != GL_NO_ERROR){
@@ -52,19 +57,27 @@ void testApp::update()
 				SkeletonBone headBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HEAD)->second;
 				SkeletonBone lHandBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HAND_LEFT)->second;
 				SkeletonBone rHandBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HAND_RIGHT)->second;
-				head = head.getInterpolated( ofVec3f( headBone.getScreenPosition().x, headBone.getScreenPosition().y, 0 ), 0.5);
-				head.z =  fabs(ofInterpolateCosine( head.z, headBone.getStartPosition().x, 0.5)) + 0.1;
-				lHand = lHand.getInterpolated( ofVec3f(lHandBone.getScreenPosition().x, lHandBone.getScreenPosition().y, lHandBone.getScreenPosition().z), 0.5);
+				ofVec3f hb( headBone.getScreenPosition().x, headBone.getScreenPosition().y, 0 );
+				head = head.getInterpolated(hb, 0.5);
+				head.z =  ofInterpolateCosine( head.z, headBone.getStartPosition().x, 0.5) + 0.1;
+				ofVec3f lhb(lHandBone.getScreenPosition().x, lHandBone.getScreenPosition().y, 0);
+				lHand = lHand.getInterpolated( lhb, 0.5);
 				lHand.z = ofInterpolateCosine( lHand.z, lHandBone.getStartPosition().x, 0.5);
-				rHand = rHand.getInterpolated( ofVec3f(rHandBone.getScreenPosition().x, rHandBone.getScreenPosition().y, rHandBone.getScreenPosition().z), 0.5);
+				ofVec3f rhb(rHandBone.getScreenPosition().x, rHandBone.getScreenPosition().y, 0);
+				rHand = rHand.getInterpolated( rhb, 0.5);
 				rHand.z = ofInterpolateCosine( rHand.z, rHandBone.getStartPosition().x, 0.5);
+
+				cout << headBone.getScreenPosition()  << endl;
+				cout << rHandBone.getScreenPosition() << endl;
+				cout << lHandBone.getScreenPosition() << endl;
+
+				//cout << kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HEAD)->second.getScreenPosition() << endl;
+				//cout << kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HAND_LEFT)->second.getScreenPosition() << endl;
+				//cout << kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HAND_RIGHT)->second.getScreenPosition() << endl;
 
 				jointDistance = head.distance(rHand);
 				jointDistance += lHand.distance(rHand);
 				jointDistance += lHand.distance(head);
-
-				//cout << head << " " << lHand << " " << rHand << endl;
-				cout << jointDistance << " " ;
 
 				hasSkeleton = true;
 
@@ -90,12 +103,14 @@ void testApp::draw(){
 	if(hasSkeleton)
 	{
 		
-		shader.setUniform3f("headPoint", 1.0 + (head.x/-320), 1.0 + (head.y/-240) - 0.1, head.z);
-		shader.setUniform3f("lHandPoint", 1.0 + (lHand.x/-320), 1.0 + (lHand.y/-240), lHand.z);
-		shader.setUniform3f("rHandPoint", 1.0 + (rHand.x/-320), 1.0 + (rHand.y/-240), rHand.z);
-		shader.setUniform1f("frequency", p4);
-		shader.setUniform1f("scalar", p5);
+		// something in here blows up in release mode
+		shader.setUniform3f("headPoint", 1.0 + (head.x/-320.0), 1.0 + (head.y/-240.0) - 0.1,head.z);
+		shader.setUniform3f("lHandPoint", 1.0 + (lHand.x/-320.0), 1.0 + (lHand.y/-240.0), lHand.z);
+		shader.setUniform3f("rHandPoint", 1.0 + (rHand.x/-320.0), 1.0 + (rHand.y/-240.0), rHand.z);
+		//shader.setUniform1f("frequency", p4);
+		//shader.setUniform1f("scalar", p5);
 		shader.setUniform1f("blobDensity", jointDistance/600.0);
+		//shader.setUniform1f("blobDensity", 2.0);
 
 	} else {
 
@@ -114,6 +129,7 @@ void testApp::draw(){
 
 	if(!hasSkeleton) 
 	{
+		ofEnableAlphaBlending();
 		gui.draw();
 	}
 }

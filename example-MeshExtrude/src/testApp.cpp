@@ -26,15 +26,11 @@ void testApp::setup(){
 
 			ofBoxPrimitive b2 = tmpBox;
 
-			for( int k = 0; k < b2.getMesh().getVertices().size(); k++ ) 
-			{
-
+			for( int k = 0; k < b2.getMesh().getVertices().size(); k++ ) {
 				b2.getMesh().getVerticesPointer()[k].set( b2.getMesh().getVertex(k).x + (i * 16), 
 														  b2.getMesh().getVertex(k).y + (j * 14), 
 														  b2.getMesh().getVertex(k).z);
-
 			}
-
 			mVboBox.append(b2.getMesh());
 		}
 	}
@@ -47,9 +43,6 @@ void testApp::setup(){
 	s.internalformat = GL_RGB;
 	fbo.allocate(s);
 
-
-	//fbo.createAndAttachDepthStencilTexture(GL_TEXTURE_RECTANGLE, GL_RGB, 0);
-
 	fbo.begin();
 	ofClear(255,255,255, 0);
 	glClear(GL_DEPTH_BUFFER_BIT );
@@ -58,9 +51,18 @@ void testApp::setup(){
 
 	// load the depth image into our texture
 	raysTexture.loadImage("rays.jpg");
+
+#ifdef USE_PROGRAMMABLE_GL
+
 	rayShader.load("shaders/rays.vert", "shaders/rays.frag");
-	
 	depthDisplace.load("shaders/displace.vert", "shaders/displace.frag");
+
+#else 
+
+	rayShader.load("shaders/rays_gl2.vert", "shaders/rays_gl2.frag");
+	depthDisplace.load("shaders/displace_gl2.vert", "shaders/displace_gl2.frag");
+
+#endif
 
 	mCamMain.setDistance(800);
 	mCamMain.setPosition(512, 384, 800);
@@ -149,6 +151,7 @@ void testApp::draw()
 	//fbo.draw(0,0);
 	rayShader.end();
 
+	ofDisableDepthTest();
 	ofEnableAlphaBlending();
 
 	gui.draw();

@@ -5,7 +5,7 @@
 // by default this example will run in OpenGL 2.0, see testApp.h for running it
 // in OpenGL 3.2
 
-#define USE_PROGRAMMABLE_GL
+//#define USE_PROGRAMMABLE_GL
 
 #ifdef USE_PROGRAMMABLE_GL
 // tig: using the programmable GL renderer is more fun, since we can use GLSL 150 =)

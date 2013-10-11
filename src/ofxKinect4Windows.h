@@ -15,7 +15,7 @@ public:
 	const ofMatrix4x4 getCameraRotationMatrix();
 	int getEndJoint();
 	const ofVec3f& getStartPosition();
-	const ofVec3f& getScreenPosition();
+	const ofVec3f getScreenPosition();
 	const ofQuaternion&	getRotation();
 	const ofMatrix4x4& getRotationMatrix();
 	const int getStartJoint();

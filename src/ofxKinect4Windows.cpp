@@ -9,7 +9,12 @@ SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE
 
 	position.set( inPosition.x, inPosition.y, inPosition.z );
 
-	NuiTransformSkeletonToDepthImage(inPosition, &(screenPosition.x), &(screenPosition.y), NUI_IMAGE_RESOLUTION_640x480);
+	float spx, spy;
+
+	NuiTransformSkeletonToDepthImage(inPosition, &spx, &spy, NUI_IMAGE_RESOLUTION_640x480);
+
+	screenPosition.x = spx;
+	screenPosition.y = spy;
 
 	rotation.set( orient.hierarchicalRotation.rotationMatrix.M11, orient.hierarchicalRotation.rotationMatrix.M12, orient.hierarchicalRotation.rotationMatrix.M13, orient.hierarchicalRotation.rotationMatrix.M14,
 		orient.hierarchicalRotation.rotationMatrix.M21, orient.hierarchicalRotation.rotationMatrix.M22, orient.hierarchicalRotation.rotationMatrix.M23, orient.hierarchicalRotation.rotationMatrix.M24,
@@ -46,7 +51,7 @@ int SkeletonBone::getEndJoint() {
 	return endJoint;
 }
 
-const ofVec3f& SkeletonBone::getScreenPosition() {
+const ofVec3f SkeletonBone::getScreenPosition() {
 	return screenPosition;
 }
 
