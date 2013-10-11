@@ -41,13 +41,16 @@ ofPixels colorPix = getColorPixelsRef();
 ofPixels depthPix = getDepthPixelsRef();///< grayscale values
 ofShortPixels rawDepthPix = getRawDepthPixelsRef();	///< raw 11 bit values
 ````
+
+To get the screen locations of the skeletons and joints of those skeletons
+
+````
 if(kinect.isNewSkeleton()) {
 		for( int i = 0; i < kinect.getSkeletons().size(); i++) 
 		{
-      // has a head? probably working ok then :)
+      			// has a head? probably working ok then :)
 			if(kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HEAD) != kinect.getSkeletons().at(i).end())
 			{
-
 				// just get the first one
 				SkeletonBone headBone = kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HEAD)->second;
 				ofVec2f headScrenPosition( headBone.getScreenPosition().x, headBone.getScreenPosition().y);
