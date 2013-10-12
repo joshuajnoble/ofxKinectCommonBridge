@@ -50,6 +50,8 @@
     <OutDir>bin\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(KINECTSDK10_DIR)inc;$(KINECT_TOOLKIT_DIR)inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(KINECTSDK10_DIR)\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -60,16 +62,21 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;..\..\..\addons\ofxKinect4Windows\src;..\..\..\addons\ofxKinect4Windows\libs\KinectWrapper\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\..\..\addons\ofxKinectCommonBridge\src;..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <AdditionalDependencies>%(AdditionalDependencies);KinectWrapper.lib;Kinect10.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinect4Windows\libs\KinectWrapper\lib\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);KinectCommonBridge.lib;Kinect10.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinect4Windows\libs\KinectCommonBridge\lib\windows\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
+xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\*.dll" "$(ProjectDir)bin"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -77,7 +84,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\..\..\addons\ofxKinect4Windows\src;..\..\..\addons\ofxKinect4Windows\libs\KinectCommonBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -87,9 +94,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);KinectCommonBridge.lib;Kinect10.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinect4Windows\libs\KinectCommonBridge\lib\windows\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
+xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\x86\*.dll" "$(ProjectDir)bin"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ofxKinect4Windows.cpp" />
@@ -97,7 +109,7 @@
     <ClCompile Include="src\testApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\libs\KinectWrapper\include\KinectWrapperLib.h" />
+    <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h" />
     <ClInclude Include="..\src\ofxKinect4Windows.h" />
     <ClInclude Include="src\testApp.h" />
   </ItemGroup>

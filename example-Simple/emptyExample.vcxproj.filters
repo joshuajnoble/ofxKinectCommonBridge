@@ -27,19 +27,19 @@
     <Filter Include="addons\ofxKinect4Windows\libs">
       <UniqueIdentifier>{b3ad244f-0f4f-4a4e-9245-a0864edcaea2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="addons\ofxKinect4Windows\libs\KinectWrapper">
-      <UniqueIdentifier>{2450e4cc-17b5-4935-93fb-21fdb15dfe10}</UniqueIdentifier>
+    <Filter Include="addons\ofxKinect4Windows\libs\KinectCommonBridge">
+      <UniqueIdentifier>{8fab884f-e27c-42cb-8e9c-9dcd99c028b0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\testApp.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h">
+      <Filter>addons\ofxKinect4Windows\libs\KinectCommonBridge</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\ofxKinect4Windows.h">
       <Filter>addons\ofxKinect4Windows\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\libs\KinectWrapper\include\KinectWrapperLib.h">
-      <Filter>addons\ofxKinect4Windows\libs\KinectWrapper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

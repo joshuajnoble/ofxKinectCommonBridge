@@ -7,9 +7,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxKinect4Windows\src\ofxKinect4Windows.cpp">
-      <Filter>addons\ofxKinect4Windows</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxBaseGui.cpp">
       <Filter>addons\ofxControlPanel</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxToggle.cpp">
       <Filter>addons\ofxControlPanel</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ofxKinect4Windows.cpp">
+      <Filter>addons\ofxKinect4Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -52,15 +52,6 @@
   <ItemGroup>
     <ClInclude Include="src\testApp.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxKinect4Windows\src\ofxKinect4Windows.h">
-      <Filter>addons\ofxKinect4Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxKinect4Windows\libs\KinectWrapper\include\KinectWrapperLib.h">
-      <Filter>addons\ofxKinect4Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxKinect4Windows\libs\KinectWrapper\lib\windows\KinectWrapperLib.h">
-      <Filter>addons\ofxKinect4Windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h">
       <Filter>addons\ofxControlPanel</Filter>
@@ -88,6 +79,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxToggle.h">
       <Filter>addons\ofxControlPanel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h">
+      <Filter>addons\ofxKinect4Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxKinect4Windows.h">
+      <Filter>addons\ofxKinect4Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

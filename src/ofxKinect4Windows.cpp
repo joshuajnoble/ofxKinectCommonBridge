@@ -9,12 +9,7 @@ SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE
 
 	position.set( inPosition.x, inPosition.y, inPosition.z );
 
-	float spx, spy;
-
-	NuiTransformSkeletonToDepthImage(inPosition, &spx, &spy, NUI_IMAGE_RESOLUTION_640x480);
-
-	screenPosition.x = spx;
-	screenPosition.y = spy;
+	NuiTransformSkeletonToDepthImage(inPosition, &(screenPosition.x), &(screenPosition.y), NUI_IMAGE_RESOLUTION_640x480);
 
 	rotation.set( orient.hierarchicalRotation.rotationMatrix.M11, orient.hierarchicalRotation.rotationMatrix.M12, orient.hierarchicalRotation.rotationMatrix.M13, orient.hierarchicalRotation.rotationMatrix.M14,
 		orient.hierarchicalRotation.rotationMatrix.M21, orient.hierarchicalRotation.rotationMatrix.M22, orient.hierarchicalRotation.rotationMatrix.M23, orient.hierarchicalRotation.rotationMatrix.M24,
@@ -51,7 +46,7 @@ int SkeletonBone::getEndJoint() {
 	return endJoint;
 }
 
-const ofVec3f SkeletonBone::getScreenPosition() {
+const ofVec3f& SkeletonBone::getScreenPosition() {
 	return screenPosition;
 }
 
@@ -376,7 +371,7 @@ bool ofxKinect4Windows::initSensor( int id )
 		return false;
 	}
 
-	UINT count = KinectGetSensorCount();
+	UINT count = KinectGetPortIDCount();
 	WCHAR portID[KINECT_MAX_PORTID_LENGTH];
 
 	if( !SUCCEEDED(KinectGetPortIDByIndex( 0, _countof(portID), portID ))) {
@@ -416,8 +411,8 @@ bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
 	}
 
 	KINECT_IMAGE_FRAME_FORMAT df = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
-
-	if( SUCCEEDED( KinectEnableDepthStream(hKinect, nearMode, res, &df) ) ){
+    KinectEnableDepthStream(hKinect, nearMode, res, &df);
+    if( KinectStreamStatusError != KinectGetDepthStreamStatus(hKinect) ){
 //		pDepthBuffer = new BYTE[depthFormat.cbBufferSize];
 		depthFormat = df;
 		//ofLog() << "allocating a buffer of size " << depthFormat.dwWidth*depthFormat.dwHeight*sizeof(unsigned short) << " when k4w wants size " << depthFormat.cbBufferSize << endl;
@@ -483,8 +478,9 @@ bool ofxKinect4Windows::initColorStream( int width, int height )
 	} else {
 		ofLog() << " invalid image size passed to startColorStream() " << endl;
 	}
-
-	if( SUCCEEDED(KinectEnableColorStream(hKinect, res, &cf)) )
+    
+    KinectEnableColorStream(hKinect, res, &cf);
+	if( KinectStreamStatusError != KinectGetColorStreamStatus(hKinect) )
 	{
 		//BYTE* pColorBuffer = new BYTE[format.cbBufferSize];
 		colorFormat = cf;
@@ -523,8 +519,9 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 	}
 
 	KINECT_IMAGE_FRAME_FORMAT cf = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
-
-	if( SUCCEEDED(KinectEnableIRStream(hKinect, res, &cf)) )
+    
+    KinectEnableIRStream(hKinect, res, &cf);
+    if( KinectStreamStatusError != KinectGetIRStreamStatus(hKinect) )
 	{
 		// IR is two byte, but we can't use shortPixels so we'll make a raw array and put it together
 		// in the update() method. Probably should be changed in future versions
@@ -561,7 +558,9 @@ bool ofxKinect4Windows::initSkeletonStream( bool seated )
 	}
 
 	NUI_TRANSFORM_SMOOTH_PARAMETERS p = { 0.5f, 0.1f, 0.5f, 0.1f, 0.1f };
-	if(SUCCEEDED( KinectEnableSkeletalStream( hKinect, seated, SkeletonSelectionModeDefault, &p))) {
+    
+    KinectEnableSkeletonStream( hKinect, seated, SkeletonSelectionModeDefault, &p);
+    if( KinectStreamStatusError != KinectGetSkeletonStreamStatus(hKinect) ) {
 		//cout << " we have skeletons " << endl;
 
 		//vector<Skeleton>::iterator skelIt = skeletons.begin();
@@ -599,6 +598,11 @@ bool ofxKinect4Windows::start()
 		initDepthStream(320,240);
 	}
 
+    HRESULT hr = KinectStartStreams(hKinect);
+    if( FAILED(hr) )
+    {
+        return false;
+    }
 	startThread(true, false);
 	bStarted = true;	
 	return true;

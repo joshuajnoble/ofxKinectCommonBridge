@@ -2,8 +2,8 @@
 
 #include "ofMain.h"
 
-#include "KinectWrapperLib.h"
-#pragma comment (lib, "KinectWrapper.lib") // add path to lib additional dependency dir $(TargetDir)
+#include "KinectCommonBridgeLib.h"
+#pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
 
 
 class SkeletonBone
@@ -15,7 +15,7 @@ public:
 	const ofMatrix4x4 getCameraRotationMatrix();
 	int getEndJoint();
 	const ofVec3f& getStartPosition();
-	const ofVec3f getScreenPosition();
+	const ofVec3f& getScreenPosition();
 	const ofQuaternion&	getRotation();
 	const ofMatrix4x4& getRotationMatrix();
 	const int getStartJoint();
@@ -103,7 +103,7 @@ class ofxKinect4Windows : protected ofThread {
 
   private:
 
-	HKINECT hKinect;
+    KCBHANDLE hKinect;
 	KINECT_IMAGE_FRAME_FORMAT depthFormat;
 	KINECT_IMAGE_FRAME_FORMAT colorFormat;
 	NUI_SKELETON_FRAME k4wSkeletons;
