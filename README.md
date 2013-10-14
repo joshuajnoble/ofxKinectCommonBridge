@@ -64,3 +64,5 @@ if(kinect.isNewSkeleton()) {
 Gestures, Face-Tracking, and the Voice API are all on their way.
 
 As of yet 32bit only and, as this is leveraging the Kinect for Windows library, Windows only.
+
+Download the Kinect For Windows SDK at http://www.microsoft.com/en-us/kinectforwindows/ and have fun
