@@ -42,17 +42,8 @@ void testApp::setup(){
 	// load the depth image into our texture
 	raysTexture.loadImage("rays.jpg");
 
-#ifdef USE_PROGRAMMABLE_GL
-
 	rayShader.load("shaders/rays.vert", "shaders/rays.frag");
 	depthDisplace.load("shaders/displace.vert", "shaders/displace.frag");
-
-#else 
-
-	rayShader.load("shaders/rays_gl2.vert", "shaders/rays_gl2.frag");
-	depthDisplace.load("shaders/displace_gl2.vert", "shaders/displace_gl2.frag");
-
-#endif
 
 	mCamMain.setDistance(800);
 	mCamMain.setPosition(512, 384, 800);
