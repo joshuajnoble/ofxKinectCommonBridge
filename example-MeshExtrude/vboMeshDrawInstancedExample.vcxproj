@@ -71,7 +71,7 @@
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <AdditionalDependencies>KinectCommonBridge.lib;Kinect10.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinect4Windows\libs\KinectCommonBridge\lib\windows\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
@@ -95,7 +95,7 @@ xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\*.dll" "$(Pr
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <AdditionalDependencies>KinectCommonBridge.lib;Kinect10.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinect4Windows\libs\KinectCommonBridge\lib\windows\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
@@ -103,28 +103,28 @@ xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\x86\*.dll" "
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxBaseGui.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxButton.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxGuiGroup.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxLabel.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxPanel.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSlider.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSliderGroup.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxToggle.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxBaseGui.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxButton.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxGuiGroup.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxLabel.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxPanel.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxSlider.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxSliderGroup.cpp" />
+    <ClCompile Include="..\..\ofxGui\src\ofxToggle.cpp" />
     <ClCompile Include="..\src\ofxKinectCommonBridge.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\testApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxButton.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxGui.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxGuiGroup.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxLabel.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxPanel.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxSlider.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxSliderGroup.h" />
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxToggle.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxBaseGui.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxButton.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxGui.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxGuiGroup.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxLabel.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxPanel.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxSlider.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxSliderGroup.h" />
+    <ClInclude Include="..\..\ofxGui\src\ofxToggle.h" />
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h" />
     <ClInclude Include="..\src\ofxKinectCommonBridge.h" />
     <ClInclude Include="src\testApp.h" />

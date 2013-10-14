@@ -7,32 +7,32 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxBaseGui.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxButton.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxGuiGroup.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxLabel.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxPanel.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSlider.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSliderGroup.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\addons\ofxGui\src\ofxToggle.cpp">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ofxKinectCommonBridge.cpp">
       <Filter>addons\ofxKinect4Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxBaseGui.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxButton.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxGuiGroup.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxLabel.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxPanel.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxSlider.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxSliderGroup.cpp">
+      <Filter>ofxGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxToggle.cpp">
+      <Filter>ofxGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,46 +45,46 @@
     <Filter Include="addons\ofxKinect4Windows">
       <UniqueIdentifier>{94ab4a79-08c3-4bdd-ae38-1631ca24891d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="addons\ofxControlPanel">
-      <UniqueIdentifier>{9178eec7-705d-4c1d-a86a-3a669d4df868}</UniqueIdentifier>
+    <Filter Include="ofxGui">
+      <UniqueIdentifier>{d66a3277-1fd9-4727-a554-cde23a4e8cdd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\testApp.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxButton.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxGui.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxGuiGroup.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxLabel.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxPanel.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxSlider.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxSliderGroup.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\addons\ofxGui\src\ofxToggle.h">
-      <Filter>addons\ofxControlPanel</Filter>
-    </ClInclude>
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h">
       <Filter>addons\ofxKinect4Windows</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxKinectCommonBridge.h">
       <Filter>addons\ofxKinect4Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxBaseGui.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxButton.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxGui.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxGuiGroup.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxLabel.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxPanel.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxSlider.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxSliderGroup.h">
+      <Filter>ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxToggle.h">
+      <Filter>ofxGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
