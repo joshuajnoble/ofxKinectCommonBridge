@@ -10,7 +10,7 @@
 
 
 #include "ofMain.h"
-#include "ofxKinect4Windows.h"
+#include "ofxKinectCommonBridge.h"
 #include "ofxGui.h"
 
 class testApp : public ofBaseApp{
@@ -37,7 +37,7 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 	
-	ofxKinect4Windows kinect;
+	ofxKinectCommonBridge kinect;
 	ofImage raysTexture;
 	ofShader rayShader;
 	ofFbo fbo;

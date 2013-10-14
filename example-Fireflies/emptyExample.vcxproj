@@ -113,7 +113,7 @@ xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\x86\*.dll" "
     <ClCompile Include="..\..\ofxGui\src\ofxSlider.cpp" />
     <ClCompile Include="..\..\ofxGui\src\ofxSliderGroup.cpp" />
     <ClCompile Include="..\..\ofxGui\src\ofxToggle.cpp" />
-    <ClCompile Include="..\src\ofxKinect4Windows.cpp" />
+    <ClCompile Include="..\src\ofxKinectCommonBridge.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\testApp.cpp" />
   </ItemGroup>
@@ -128,7 +128,7 @@ xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\x86\*.dll" "
     <ClInclude Include="..\..\ofxGui\src\ofxSliderGroup.h" />
     <ClInclude Include="..\..\ofxGui\src\ofxToggle.h" />
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridge.h" />
-    <ClInclude Include="..\src\ofxKinect4Windows.h" />
+    <ClInclude Include="..\src\ofxKinectCommonBridge.h" />
     <ClInclude Include="src\testApp.h" />
   </ItemGroup>
   <ItemGroup>

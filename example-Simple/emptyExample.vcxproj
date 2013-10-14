@@ -104,13 +104,13 @@ xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\x86\*.dll" "
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\ofxKinect4Windows.cpp" />
+    <ClCompile Include="..\src\ofxKinectCommonBridge.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\testApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h" />
-    <ClInclude Include="..\src\ofxKinect4Windows.h" />
+    <ClInclude Include="..\src\ofxKinectCommonBridge.h" />
     <ClInclude Include="src\testApp.h" />
   </ItemGroup>
   <ItemGroup>

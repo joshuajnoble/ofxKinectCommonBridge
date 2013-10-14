@@ -7,7 +7,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ofxKinect4Windows.cpp">
+    <ClCompile Include="..\src\ofxKinectCommonBridge.cpp">
       <Filter>addons\ofxKinect4Windows\src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +38,7 @@
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h">
       <Filter>addons\ofxKinect4Windows\libs\KinectCommonBridge</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ofxKinect4Windows.h">
+    <ClInclude Include="..\src\ofxKinectCommonBridge.h">
       <Filter>addons\ofxKinect4Windows\src</Filter>
     </ClInclude>
   </ItemGroup>

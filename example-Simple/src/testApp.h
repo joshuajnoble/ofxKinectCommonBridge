@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxKinect4Windows.h"
+#include "ofxKinectCommonBridge.h"
 
 class testApp : public ofBaseApp{
 	public:
@@ -19,7 +19,7 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		ofxKinect4Windows kinect;
+		ofxKinectCommonBridge kinect;
 		ofShader k4wShader;
 		ofPlanePrimitive plane;
 };

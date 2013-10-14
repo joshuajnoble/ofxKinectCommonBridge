@@ -7,9 +7,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ofxKinect4Windows.cpp">
-      <Filter>addons\ofxKinectCommonBridge</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\ofxGui\src\ofxBaseGui.cpp">
       <Filter>addons\ofxGui</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
     <ClCompile Include="..\..\ofxGui\src\ofxToggle.cpp">
       <Filter>addons\ofxGui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ofxKinectCommonBridge.cpp">
+      <Filter>addons\ofxKinectCommonBridge</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -54,9 +54,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridge.h">
-      <Filter>addons\ofxKinectCommonBridge</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ofxKinect4Windows.h">
       <Filter>addons\ofxKinectCommonBridge</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ofxGui\src\ofxBaseGui.h">
@@ -85,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="..\..\ofxGui\src\ofxToggle.h">
       <Filter>addons\ofxGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ofxKinectCommonBridge.h">
+      <Filter>addons\ofxKinectCommonBridge</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

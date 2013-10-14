@@ -3,6 +3,8 @@
 
 #include "ofGLProgrammableRenderer.h"
 
+#define USE_PROGRAMMABLE_RENDERER
+
 //========================================================================
 int main( ){
 

@@ -24,8 +24,6 @@ void testApp::draw(){
 
 	ofDisableAlphaBlending(); //Kinect alpha channel is default 0;
 	kinect.draw(0,0);
-	//kinect.drawDepth(kinect.getColorPixelsRef().getWidth(), 0);
-
 }
 
 //--------------------------------------------------------------

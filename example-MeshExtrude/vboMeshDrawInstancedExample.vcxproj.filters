@@ -31,7 +31,7 @@
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxToggle.cpp">
       <Filter>addons\ofxControlPanel</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ofxKinect4Windows.cpp">
+    <ClCompile Include="..\src\ofxKinectCommonBridge.cpp">
       <Filter>addons\ofxKinect4Windows</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +83,7 @@
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h">
       <Filter>addons\ofxKinect4Windows</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ofxKinect4Windows.h">
+    <ClInclude Include="..\src\ofxKinectCommonBridge.h">
       <Filter>addons\ofxKinect4Windows</Filter>
     </ClInclude>
   </ItemGroup>
