@@ -1,4 +1,4 @@
-#include "ofxKinect4Windows.h"
+#include "ofxKinectCommonBridge.h"
 
 SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient) {
 
@@ -50,7 +50,7 @@ const ofVec3f& SkeletonBone::getScreenPosition() {
 	return screenPosition;
 }
 
-ofxKinect4Windows::ofxKinect4Windows(){
+ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	hKinect = NULL;
 
 	bIsFrameNewVideo = false;
@@ -69,14 +69,14 @@ ofxKinect4Windows::ofxKinect4Windows(){
 }
 
 //---------------------------------------------------------------------------
-void ofxKinect4Windows::setDepthClipping(float nearClip, float farClip){
+void ofxKinectCommonBridge::setDepthClipping(float nearClip, float farClip){
 	nearClipping = nearClip;
 	farClipping = farClip;
 	updateDepthLookupTable();
 }
 
 //---------------------------------------------------------------------------
-void ofxKinect4Windows::updateDepthLookupTable()
+void ofxKinectCommonBridge::updateDepthLookupTable()
 {
 	unsigned char nearColor = bNearWhite ? 255 : 0;
 	unsigned char farColor = bNearWhite ? 0 : 255;
@@ -89,7 +89,7 @@ void ofxKinect4Windows::updateDepthLookupTable()
 }
 
 /*
-bool ofxKinect4Windows::simpleInit()
+bool ofxKinectCommonBridge::simpleInit()
 {
 
 	if(ofGetCurrentRenderer()->getType() == ofGLProgrammableRenderer::TYPE)
@@ -111,7 +111,7 @@ bool ofxKinect4Windows::simpleInit()
 		}
 	}
 	else{
-		ofLogError("ofxKinect4Windows::open") << "Error opening color stream";
+		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
 
@@ -134,7 +134,7 @@ bool ofxKinect4Windows::simpleInit()
 		}
 	} 
 	else{
-		ofLogError("ofxKinect4Windows::open") << "Error opening depth stream";
+		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
 		return false;
 	}
 
@@ -145,33 +145,33 @@ bool ofxKinect4Windows::simpleInit()
 */
 
 /// is the current frame new?
-bool ofxKinect4Windows::isFrameNew(){
+bool ofxKinectCommonBridge::isFrameNew(){
 	return isFrameNewVideo() || isFrameNewDepth();
 }
 
-bool ofxKinect4Windows::isFrameNewVideo(){
+bool ofxKinectCommonBridge::isFrameNewVideo(){
 	return bIsFrameNewVideo;
 }
 
-bool ofxKinect4Windows::isFrameNewDepth(){
+bool ofxKinectCommonBridge::isFrameNewDepth(){
 	return bIsFrameNewDepth;
 }
 
-bool ofxKinect4Windows::isNewSkeleton() {
+bool ofxKinectCommonBridge::isNewSkeleton() {
 	return bNeedsUpdateSkeleton;
 }
 
-vector<Skeleton> &ofxKinect4Windows::getSkeletons() {
+vector<Skeleton> &ofxKinectCommonBridge::getSkeletons() {
 	return skeletons;
 }
 
 /// updates the pixel buffers and textures
 /// make sure to call this to update to the latest incoming frames
-void ofxKinect4Windows::update()
+void ofxKinectCommonBridge::update()
 {
 	if(!bStarted)
 	{
-		ofLogError("ofxKinect4Windows::update") << "Grabber not started";
+		ofLogError("ofxKinectCommonBridge::update") << "Grabber not started";
 		return;
 	}
 
@@ -261,7 +261,7 @@ void ofxKinect4Windows::update()
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::updateDepthPixels() {
+void ofxKinectCommonBridge::updateDepthPixels() {
 
 	for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) 
 	{
@@ -271,103 +271,103 @@ void ofxKinect4Windows::updateDepthPixels() {
 }
 
 //------------------------------------
-void ofxKinect4Windows::updateIRPixels() {
+void ofxKinectCommonBridge::updateIRPixels() {
 	for(int i = 0; i < irPixels.getWidth()*irPixels.getHeight(); i++) {
 		irPixels[i] =  ofClamp(irPixels[i] >> 1, 0, 255 );
 	}
 }
 
 //------------------------------------
-ofPixels& ofxKinect4Windows::getColorPixelsRef(){
+ofPixels& ofxKinectCommonBridge::getColorPixelsRef(){
 	return videoPixels;
 }
 
 //------------------------------------
-ofPixels & ofxKinect4Windows::getDepthPixelsRef(){       	///< grayscale values
+ofPixels & ofxKinectCommonBridge::getDepthPixelsRef(){       	///< grayscale values
 	return depthPixels;
 }
 
 //------------------------------------
-ofShortPixels & ofxKinect4Windows::getRawDepthPixelsRef(){
+ofShortPixels & ofxKinectCommonBridge::getRawDepthPixelsRef(){
 	return depthPixelsRaw;
 }
 
 //------------------------------------
-void ofxKinect4Windows::setUseTexture(bool bUse){
+void ofxKinectCommonBridge::setUseTexture(bool bUse){
 	bUseTexture = bUse;
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::draw(float _x, float _y, float _w, float _h) {
+void ofxKinectCommonBridge::draw(float _x, float _y, float _w, float _h) {
 	if(bUseTexture) {
 		videoTex.draw(_x, _y, _w, _h);
 	}
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::draw(float _x, float _y) {
+void ofxKinectCommonBridge::draw(float _x, float _y) {
 	draw(_x, _y, (float)colorFormat.dwWidth, (float)colorFormat.dwHeight);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::draw(const ofPoint & point) {
+void ofxKinectCommonBridge::draw(const ofPoint & point) {
 	draw(point.x, point.y);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::draw(const ofRectangle & rect) {
+void ofxKinectCommonBridge::draw(const ofRectangle & rect) {
 	draw(rect.x, rect.y, rect.width, rect.height);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawRawDepth(float _x, float _y, float _w, float _h) {
+void ofxKinectCommonBridge::drawRawDepth(float _x, float _y, float _w, float _h) {
 	if(bUseTexture) {
 		rawDepthTex.draw(_x, _y, _w, _h);
 	}
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawRawDepth(float _x, float _y) {
+void ofxKinectCommonBridge::drawRawDepth(float _x, float _y) {
 	drawRawDepth(_x, _y, (float)colorFormat.dwWidth, (float)colorFormat.dwHeight);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawRawDepth(const ofPoint & point) {
+void ofxKinectCommonBridge::drawRawDepth(const ofPoint & point) {
 	drawRawDepth(point.x, point.y);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawRawDepth(const ofRectangle & rect) {
+void ofxKinectCommonBridge::drawRawDepth(const ofRectangle & rect) {
 	drawRawDepth(rect.x, rect.y, rect.width, rect.height);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawDepth(float _x, float _y, float _w, float _h) {
+void ofxKinectCommonBridge::drawDepth(float _x, float _y, float _w, float _h) {
 	if(bUseTexture) {
 		depthTex.draw(_x, _y, _w, _h);
 	}
 }
 
 //---------------------------------------------------------------------------
-void ofxKinect4Windows::drawDepth(float _x, float _y) {
+void ofxKinectCommonBridge::drawDepth(float _x, float _y) {
 	drawDepth(_x, _y, (float)depthFormat.dwWidth, (float)depthFormat.dwHeight);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawDepth(const ofPoint & point) {
+void ofxKinectCommonBridge::drawDepth(const ofPoint & point) {
 	drawDepth(point.x, point.y);
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::drawDepth(const ofRectangle & rect) {
+void ofxKinectCommonBridge::drawDepth(const ofRectangle & rect) {
 	drawDepth(rect.x, rect.y, rect.width, rect.height);
 }
 
 
-bool ofxKinect4Windows::initSensor( int id )
+bool ofxKinectCommonBridge::initSensor( int id )
 {
 	if(bStarted){
-		ofLogError("ofxKinect4Windows::initSensor") << "Cannot configure once the sensor has already started" << endl;
+		ofLogError("ofxKinectCommonBridge::initSensor") << "Cannot configure once the sensor has already started" << endl;
 		return false;
 	}
 
@@ -382,7 +382,7 @@ bool ofxKinect4Windows::initSensor( int id )
 	hKinect = KinectOpenSensor(portID);
 
 	if(!hKinect) {
-		ofLogError("ofxKinect4Windows::initSensor") << " can't open Kinect of ID " << id;
+		ofLogError("ofxKinectCommonBridge::initSensor") << " can't open Kinect of ID " << id;
 		return false;
 	}
 
@@ -394,10 +394,10 @@ bool ofxKinect4Windows::initSensor( int id )
 	return true;
 }
 
-bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
+bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMode )
 {
 	if(bStarted){
-		ofLogError("ofxKinect4Windows::initDepthStream") << " Cannot configure once the sensor has already started";
+		ofLogError("ofxKinectCommonBridge::initDepthStream") << " Cannot configure once the sensor has already started";
 		return false;
 	}
 
@@ -407,7 +407,7 @@ bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
 	} else if( width == 640 ) {
 		res = NUI_IMAGE_RESOLUTION_640x480;
 	} else {
-		ofLogError("ofxKinect4Windows::initDepthStream") << " invalid image size" << endl;
+		ofLogError("ofxKinectCommonBridge::initDepthStream") << " invalid image size" << endl;
 	}
 
 	KINECT_IMAGE_FRAME_FORMAT df = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
@@ -453,16 +453,16 @@ bool ofxKinect4Windows::initDepthStream( int width, int height, bool nearMode )
 		}
 	} 
 	else{
-		ofLogError("ofxKinect4Windows::open") << "Error opening depth stream";
+		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
 		return false;
 	}
 	return true;
 }
 
-bool ofxKinect4Windows::initColorStream( int width, int height )
+bool ofxKinectCommonBridge::initColorStream( int width, int height )
 {
 	if(bStarted){
-		ofLogError("ofxKinect4Windows::startIRStream") << " Cannot configure once the sensor has already started";
+		ofLogError("ofxKinectCommonBridge::startIRStream") << " Cannot configure once the sensor has already started";
 		return false;
 	}
 
@@ -492,16 +492,16 @@ bool ofxKinect4Windows::initColorStream( int width, int height )
 		}
 	}
 	else{
-		ofLogError("ofxKinect4Windows::open") << "Error opening color stream";
+		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
 	return true;
 }
 
-bool ofxKinect4Windows::initIRStream( int width, int height )
+bool ofxKinectCommonBridge::initIRStream( int width, int height )
 {
 	if(bStarted){
-		ofLogError("ofxKinect4Windows::startIRStream") << " Cannot configure when the sensor has already started";
+		ofLogError("ofxKinectCommonBridge::startIRStream") << " Cannot configure when the sensor has already started";
 		return false;
 	}
 
@@ -542,7 +542,7 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 			}
 		}
 	} else {
-		ofLogError("ofxKinect4Windows::open") << "Error opening color stream";
+		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
 
@@ -550,10 +550,10 @@ bool ofxKinect4Windows::initIRStream( int width, int height )
 	return true;
 }
 
-bool ofxKinect4Windows::initSkeletonStream( bool seated )
+bool ofxKinectCommonBridge::initSkeletonStream( bool seated )
 {
 	if(bStarted){
-		ofLogError("ofxKinect4Windows::initSkeletonStream") << "Cannot configure once the sensor has already started";
+		ofLogError("ofxKinectCommonBridge::initSkeletonStream") << "Cannot configure once the sensor has already started";
 		return false;
 	}
 
@@ -574,15 +574,15 @@ bool ofxKinect4Windows::initSkeletonStream( bool seated )
 		return true;
 	} 
 
-	ofLogError("ofxKinect4Windows::initSkeletonStream") << "cannot initialize stream";
+	ofLogError("ofxKinectCommonBridge::initSkeletonStream") << "cannot initialize stream";
 	return false;
 }
 
 //----------------------------------------------------------
-bool ofxKinect4Windows::start()
+bool ofxKinectCommonBridge::start()
 {
 	if(bStarted){
-		ofLogError("ofxKinect4Windows::start") << "Stream already started";
+		ofLogError("ofxKinectCommonBridge::start") << "Stream already started";
 		return false;
 	}
 
@@ -609,7 +609,7 @@ bool ofxKinect4Windows::start()
 }
 
 //----------------------------------------------------------
-void ofxKinect4Windows::stop() {
+void ofxKinectCommonBridge::stop() {
 	if(bStarted){
 		waitForThread(true);
 		bStarted = false;
@@ -617,7 +617,7 @@ void ofxKinect4Windows::stop() {
 }	
 
 //----------------------------------------------------------
-void ofxKinect4Windows::threadedFunction(){
+void ofxKinectCommonBridge::threadedFunction(){
 	bool alignToDepth = false;
 	LONGLONG timestamp;
 	

@@ -33,9 +33,9 @@ private:
 
 typedef map<_NUI_SKELETON_POSITION_INDEX, SkeletonBone> Skeleton;
 
-class ofxKinect4Windows : protected ofThread {
+class ofxKinectCommonBridge : protected ofThread {
   public:
-	ofxKinect4Windows();
+	ofxKinectCommonBridge();
 
 	// new API
 	bool initSensor( int id = 0 );
