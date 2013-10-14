@@ -79,5 +79,4 @@ void main( void ) {
 
    vec4 vidColor = vec4(texture(videoTex, texCoordVarying.xy * videoScaling).rgb, 1.0);
    fragColor = mix( vidColor, blobColor, interp);
-   //fragColor = vec4(texture(videoTex, texCoordVarying.xy * videoScaling).rgb, 1.0);
 }
