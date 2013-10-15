@@ -9,6 +9,9 @@ SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE
 
 	position.set( inPosition.x, inPosition.y, inPosition.z );
 
+	startJoint = orient.startJoint;
+	endJoint = orient.endJoint;
+
 	NuiTransformSkeletonToDepthImage(inPosition, &(screenPosition.x), &(screenPosition.y), NUI_IMAGE_RESOLUTION_640x480);
 
 	rotation.set( orient.hierarchicalRotation.rotationMatrix.M11, orient.hierarchicalRotation.rotationMatrix.M12, orient.hierarchicalRotation.rotationMatrix.M13, orient.hierarchicalRotation.rotationMatrix.M14,
@@ -46,7 +49,7 @@ int SkeletonBone::getEndJoint() {
 	return endJoint;
 }
 
-const ofVec3f& SkeletonBone::getScreenPosition() {
+const ofVec3f SkeletonBone::getScreenPosition() {
 	return screenPosition;
 }
 
@@ -87,62 +90,6 @@ void ofxKinectCommonBridge::updateDepthLookupTable()
 		depthLookupTable[i] = ofMap(i, nearClipping, farClipping, nearColor, farColor, true);
 	}
 }
-
-/*
-bool ofxKinectCommonBridge::simpleInit()
-{
-
-	if(ofGetCurrentRenderer()->getType() == ofGLProgrammableRenderer::TYPE)
-	{
-		bProgrammableRenderer = true;
-	}
-
-	hKinect = KinectOpenDefaultSensor();
-
-	KINECT_IMAGE_FRAME_FORMAT cf = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
-	
-	if( SUCCEEDED(KinectEnableColorStream(hKinect, NUI_IMAGE_RESOLUTION_640x480, &cf)) )
-	{
-		colorFormat = cf;
-		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
-		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
-		if(bUseTexture){
-			videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
-		}
-	}
-	else{
-		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
-		return false;
-	}
-
-	KINECT_IMAGE_FRAME_FORMAT df = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
-
-	if( SUCCEEDED( KinectEnableDepthStream(hKinect, 0, NUI_IMAGE_RESOLUTION_640x480, &df) ) ){
-		depthFormat = df;
-		depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		depthPixelsRaw.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		depthPixelsRawBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
-		if(bUseTexture){
-
-			if(bProgrammableRenderer ) {
-				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);
-				depthTex.setRGToRGBASwizzles(true);
-			} else {
-				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
-			}
-		}
-	} 
-	else{
-		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
-		return false;
-	}
-
-	startThread(true, false);
-	bGrabberInited = true;
-	return true;
-}
-*/
 
 /// is the current frame new?
 bool ofxKinectCommonBridge::isFrameNew(){
@@ -361,6 +308,41 @@ void ofxKinectCommonBridge::drawDepth(const ofPoint & point) {
 //----------------------------------------------------------
 void ofxKinectCommonBridge::drawDepth(const ofRectangle & rect) {
 	drawDepth(rect.x, rect.y, rect.width, rect.height);
+}
+
+void ofxKinectCommonBridge::drawSkeleton( int index )
+{
+	// Iterate through skeletons
+	uint32_t i = 0;
+	if(index > skeletons.size())
+	{
+		ofLog() << " skeleton index too high " << endl;
+		return;
+	}
+
+	// Iterate through joints
+	for ( Skeleton::iterator it = skeletons.at(index).begin(); it != skeletons.at(index).end(); ++it ) 
+	{
+
+		// Get position and rotation
+		SkeletonBone bone	= it->second;
+
+		ofSetColor(255, 255, 255);
+		ofSetLineWidth(3.0); // fat lines
+		int startJoint = bone.getStartJoint();
+		// do we have a start joint?
+		if ( skeletons.at(index).find( ( NUI_SKELETON_POSITION_INDEX ) startJoint ) != skeletons.at(index).end() ) 
+		{
+			// draw the line
+			ofLine( bone.getScreenPosition(), skeletons.at(index).find( ( NUI_SKELETON_POSITION_INDEX ) startJoint )->second.getScreenPosition() );
+		}
+
+		ofSetColor(255, 0, 0);
+		// Draw joint
+		ofCircle( bone.getScreenPosition(), 10 );
+	}
+
+	ofSetColor(255, 255, 255);
 }
 
 

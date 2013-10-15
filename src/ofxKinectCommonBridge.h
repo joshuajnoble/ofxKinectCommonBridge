@@ -13,12 +13,15 @@ public:
 	// copies stuff all over the place
 	const ofQuaternion getCameraRotation();
 	const ofMatrix4x4 getCameraRotationMatrix();
-	int getEndJoint();
+
 	const ofVec3f& getStartPosition();
-	const ofVec3f& getScreenPosition();
+	const ofVec3f getScreenPosition();
 	const ofQuaternion&	getRotation();
 	const ofMatrix4x4& getRotationMatrix();
+
 	const int getStartJoint();
+	int getEndJoint();
+
 	SkeletonBone( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& bone );
 
 private:
@@ -87,6 +90,7 @@ class ofxKinectCommonBridge : protected ofThread {
 	void drawIR( float x, float y, float w, float h );
 
 	vector<Skeleton> &getSkeletons();
+	void drawSkeleton(int index);
 
 	ofTexture &getRawDepthTexture() {
 		return rawDepthTex;
