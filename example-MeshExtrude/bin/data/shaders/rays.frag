@@ -51,6 +51,6 @@ void main()
 
 	vec4 dt = texture(dtex, texCoordVarying);
 	vec3 min = vec3(0.94,0.94,0.94);
-	vec3 max = (vec3(dt.x, dt.x, dt.x) - min) * 12.0);
+	vec3 max = (vec3(dt.x, dt.x, dt.x) - min) * 12.0;
 	fragColor = (fragColor * exposure) * vec4(max, 1.0) + (normalVarying * 10.0) + ov;
 }
