@@ -1,16 +1,5 @@
 #include "testApp.h"
 
-/**
- * tig: This example shows how to draw instanced geometry using 
- * ofVboMesh.drawInstanced() and matching GLSL shader code.
- * The most interesting things will happen in the shader files, 
- * and in the draw() method, where everything is set up properly 
- * to allow instanced rendering.
- *
- * Note that you can feed any ofVboMesh to the instanced draw method.
- *
- */
-
 #define USE_PROGRAMMABLE_GL
 
 //--------------------------------------------------------------
