@@ -1,9 +1,7 @@
 #include "ofMain.h"
 #include "testApp.h"
 
-
 // only works in OpenGL 3.2 right now
-
 #define USE_PROGRAMMABLE_GL
 
 #ifdef USE_PROGRAMMABLE_GL
