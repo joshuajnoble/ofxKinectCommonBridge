@@ -1,6 +1,6 @@
 #include "testApp.h"
 
-
+#define USE_PROGRAMMABLE_RENDERER
 
 void testApp::setup(){
 
