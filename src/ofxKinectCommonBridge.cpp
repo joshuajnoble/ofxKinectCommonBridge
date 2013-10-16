@@ -86,7 +86,8 @@ void ofxKinectCommonBridge::updateDepthLookupTable()
 	unsigned int maxDepthLevels = 10001;
 	depthLookupTable.resize(maxDepthLevels);
 	depthLookupTable[0] = 0;
-	for(unsigned int i = 1; i < maxDepthLevels; i++) {
+	for(unsigned int i = 1; i < maxDepthLevels; i++)
+	{
 		depthLookupTable[i] = ofMap(i, nearClipping, farClipping, nearColor, farColor, true);
 	}
 }
@@ -505,9 +506,14 @@ bool ofxKinectCommonBridge::initIRStream( int width, int height )
     KinectEnableIRStream(hKinect, res, &cf);
     if( KinectStreamStatusError != KinectGetIRStreamStatus(hKinect) )
 	{
+
 		// IR is two byte, but we can't use shortPixels so we'll make a raw array and put it together
 		// in the update() method. Probably should be changed in future versions
 		colorFormat = cf;
+
+		ofLog() << "allocating a buffer of size " << colorFormat.dwWidth*colorFormat.dwHeight*sizeof(unsigned char)*2 << " when k4w wants size " << colorFormat.cbBufferSize << endl;
+
+
 		irPixelByteArray = new BYTE[colorFormat.cbBufferSize];
 
 		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_GRAYSCALE);
@@ -609,16 +615,10 @@ void ofxKinectCommonBridge::threadedFunction(){
 	//how can we tell?
 	while(isThreadRunning()) {
 		alignToDepth = !alignToDepth; // flip depth alignment every get - strobing
-		//KinectGetColorFrame( _In_ HKINECT hKinect, ULONG cbBufferSize, _Out_cap_(cbBufferSize) BYTE* pColorBuffer, _Out_opt_ LONGLONG* liTimeStamp );
         if( KinectIsDepthFrameReady(hKinect) && SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
 		{
 			bNeedsUpdateDepth = true;
-			//printf("depth Timestamp: %d\r\n", timestamp);
         }
-
-		// KinectGetDepthFrame( _In_ HKINECT hKinect, ULONG cbBufferSize, _Out_cap_(cbBufferSize) BYTE* pDepthBuffer, _Out_opt_ LONGLONG* liTimeStamp );
-
-		//cout << colorFormat.cbBufferSize << endl;
 
 		if(bVideoIsInfrared)
 		{
@@ -628,10 +628,8 @@ void ofxKinectCommonBridge::threadedFunction(){
 				
 				for (int i = 0; i < colorFormat.dwWidth * colorFormat.dwHeight; i++)
 				{
-					//videoPixelsBack.getPixels()[i] = reinterpret_cast<USHORT*>(irPixelByteArray)[i] >> 8;
-					videoPixelsBack.getPixels()[i] = irPixelByteArray[i];
+					videoPixelsBack.getPixels()[i] = reinterpret_cast<USHORT*>(irPixelByteArray)[i] >> 8;
 				}
-
 			}
 		}
 		else
