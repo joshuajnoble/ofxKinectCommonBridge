@@ -439,6 +439,7 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
 		return false;
 	}
+	bInited = true;
 	return true;
 }
 
@@ -478,6 +479,7 @@ bool ofxKinectCommonBridge::initColorStream( int width, int height )
 		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
+	bInited = true;
 	return true;
 }
 
