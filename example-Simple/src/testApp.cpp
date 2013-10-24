@@ -4,14 +4,14 @@
 void testApp::setup(){
 
 	kinect.initSensor();
-	kinect.initIRStream(640, 480);
-	//kinect.initColorStream(640, 480);
-	kinect.initDepthStream(320, 240, true);
+	//kinect.initIRStream(640, 480);
+	kinect.initColorStream(640, 480, true);
+	kinect.initDepthStream(640, 480, true);
 	//kinect.initSkeletonStream(true);
 
 	//simple start
 	kinect.start();
-
+	ofDisableAlphaBlending(); //Kinect alpha channel is default 0;
 }
 
 //--------------------------------------------------------------
@@ -20,12 +20,10 @@ void testApp::update(){
 }
 
 //--------------------------------------------------------------
-void testApp::draw(){
-
-	//ofDisableAlphaBlending(); //Kinect alpha channel is default 0;
-
+void testApp::draw()
+{
 	kinect.draw(0,0);
-	kinect.drawDepth(640, 0);
+	kinect.drawDepth(100, 0);
 }
 
 //--------------------------------------------------------------

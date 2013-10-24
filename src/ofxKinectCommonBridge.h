@@ -3,6 +3,7 @@
 #include "ofMain.h"
 
 #include "KinectCommonBridgeLib.h"
+#include "NuiSensor.h"
 #pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
 
 
@@ -42,8 +43,8 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	// new API
 	bool initSensor( int id = 0 );
-	bool initDepthStream( int width, int height, bool nearMode = false );
-	bool initColorStream( int width, int height );
+	bool initDepthStream( int width, int height, bool nearMode = false, bool mapDepthToColor = false );
+	bool initColorStream( int width, int height, bool mapColorToDepth = false );
 	bool initIRStream( int width, int height );
 	bool initSkeletonStream( bool seated );
 	bool start();
@@ -157,5 +158,16 @@ class ofxKinectCommonBridge : protected ofThread {
 	BYTE *irPixelByteArray;
 
 	void threadedFunction();
+
+	bool mappingColorToDepth;
+	bool mappingDepthToColor;
+	bool beginMappingColorToDepth;
+
+	NUI_IMAGE_RESOLUTION colorRes;
+	NUI_IMAGE_RESOLUTION depthRes;
+
+	INuiSensor *nuiSensor;
+	INuiCoordinateMapper *mapper;
+
 
 };
