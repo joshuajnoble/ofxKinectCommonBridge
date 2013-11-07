@@ -4,8 +4,10 @@
 
 #include "KinectCommonBridgeLib.h"
 #include "NuiSensor.h"
-#pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
+#include "KinectSpeechLib.h"
 
+#pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
+#pragma comment (lib, "KinectSpeechLib.lib") // add path to lib additional dependency dir $(TargetDir)
 
 class SkeletonBone
 {
@@ -36,6 +38,13 @@ private:
 };
 
 typedef map<_NUI_SKELETON_POSITION_INDEX, SkeletonBone> Skeleton;
+
+class KinectSpeechEvent : public ofEventArgs
+{
+public:
+	string recognizedWord;
+	int confidence;
+};
 
 class ofxKinectCommonBridge : protected ofThread {
   public:
@@ -95,16 +104,30 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	ofTexture &getRawDepthTexture() {
 		return rawDepthTex;
-	}
+	};
 
 	ofTexture &getDepthTexture() {
 		return depthTex;
-	}
+	};
 
 
 	ofTexture &getColorTexture() {
 		return videoTex;
-	}
+	};
+
+//////////////////////////////////////////////////////////////////////////////
+// Audio/Speech
+//////////////////////////////////////////////////////////////////////////////
+
+	void getAudio( float *audioIn );
+	void loadGrammar( string grammarFile );
+	void processSpeech();
+	void startAudio();
+	void stopAudio();
+	void startSpeechRecognition();
+	void stopSpeechRecognition();
+
+	static ofEvent<KinectSpeechEvent> speechEvent;
 
   private:
 
@@ -168,6 +191,6 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	INuiSensor *nuiSensor;
 	INuiCoordinateMapper *mapper;
-
+	//IKinectSpeechLib *kinectSpeech;
 
 };

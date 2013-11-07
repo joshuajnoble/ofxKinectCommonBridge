@@ -63,15 +63,15 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>src;..\..\..\addons\ofxKinectCommonBridge\src;..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\..\..\addons\ofxKinectCommonBridge\src;..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\include;..\..\..\addons\ofxKinectCommonBridge\libs\KinectSpeechLib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <AdditionalDependencies>%(AdditionalDependencies);KinectCommonBridge.lib;Kinect10.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);KinectCommonBridge.lib;Kinect10.lib;KinectSpeechLib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows;..\..\..\addons\ofxKinectCommonBridge\libs\KinectSpeechLib\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
@@ -111,6 +111,7 @@ xcopy /e /i /y "$(ProjectDir)..\libs\KinectCommonBridge\lib\windows\x86\*.dll" "
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h" />
+    <ClInclude Include="..\libs\KinectSpeechLib\include\KinectSpeechLib.h" />
     <ClInclude Include="..\src\ofxKinectCommonBridge.h" />
     <ClInclude Include="src\testApp.h" />
   </ItemGroup>

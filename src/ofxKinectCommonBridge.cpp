@@ -192,7 +192,8 @@ void ofxKinectCommonBridge::update()
 
 
 	// update depth pixels and texture if necessary
-	if(bNeedsUpdateDepth){
+	if(bNeedsUpdateDepth)
+	{
 
 		if(mappingColorToDepth) {
 			beginMappingColorToDepth = true;
@@ -220,14 +221,15 @@ void ofxKinectCommonBridge::update()
 
 			if(SUCCEEDED(mapResult))
 			{
-
-				for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ ) {
+				for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ )
+				{
 					if(pts[i].x > 0 && pts[i].x < depthFormat.dwWidth && pts[i].y > 0 && pts[i].y < depthFormat.dwHeight) {
 						depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[pts[i].y * depthFormat.dwWidth + pts[i].x] >> 4, 0, depthLookupTable.size()-1 ) ];
 					} else {
 						depthPixels[i] = 0;
 					}
 				}
+
 			} else {
 				ofLog() << " mapping error " << mapResult << endl;
 			}
@@ -761,4 +763,60 @@ void ofxKinectCommonBridge::threadedFunction(){
 		//TODO: AUDIO
 		ofSleepMillis(10);
 	}
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// audio
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ofEvent<KinectSpeechEvent> ofxKinectCommonBridge::speechEvent;
+
+void ofxKinectCommonBridge::getAudio( float *audioIn )
+{
+
+}
+
+void ofxKinectCommonBridge::loadGrammar( string grammarFile )
+{
+	KinectSpeechLoadGrammar(grammarFile);
+}
+
+void ofxKinectCommonBridge::startAudio()
+{
+	HRESULT hr = KinectSpeechStartRecognition();
+	//KinectSpeechStart();
+	if(!SUCCEEDED(hr)) {
+		ofLogError() << " can't initialize speech recognition engine " << endl;
+	}
+}
+
+void ofxKinectCommonBridge::stopAudio()
+{
+	//HRESULT hr = stopSpeechRecognition();
+	//if(!SUCCEEDED(hr)) {
+	//	ofLogError() << " can't initialize speech recognition engine " << endl;
+	//}
+}
+
+void ofxKinectCommonBridge::processSpeech()
+{
+	string res;
+	int confidence;
+	if(KinectSpeechProcess(res, &confidence)) {
+		KinectSpeechEvent evt;
+		evt.confidence = confidence;
+		evt.recognizedWord = res;
+		ofNotifyEvent( ofxKinectCommonBridge::speechEvent, evt );
+	}
+}
+
+void ofxKinectCommonBridge::startSpeechRecognition()
+{
+	
+}
+
+void ofxKinectCommonBridge::stopSpeechRecognition()
+{
 }

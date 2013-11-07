@@ -41,6 +41,9 @@
     <ClInclude Include="..\src\ofxKinectCommonBridge.h">
       <Filter>addons\ofxKinect4Windows\src</Filter>
     </ClInclude>
+    <ClInclude Include="..\libs\KinectSpeechLib\include\KinectSpeechLib.h">
+      <Filter>addons\ofxKinect4Windows\src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
