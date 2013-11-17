@@ -66,3 +66,52 @@ Gestures, Face-Tracking, and the Voice API are all on their way.
 As of yet 32bit only and, as this is leveraging the Kinect for Windows library, Windows only.
 
 Download the Kinect For Windows SDK at http://www.microsoft.com/en-us/kinectforwindows/ and have fun
+
+
+
+#projectGenerator Help
+
+If you are using the project generator to create your ofxKinectCommonBridge projects, you may notice that your projects don't compile and throw errors about "Cannot open include file "NuiApi.h", etc. This is because there are a few additional settings that you must add to the Visual Studio project after generating that the projectGenerator currently can't add for you.
+
+So, once you have generated a project that includes ofxKinectCommonBridge:
+
+- Right click on the name of your solution in the Solution Explorer in Visual studio and select "Properties" at the bottom.
+- Ensure that "All Configurations" is selected in the Configuration drop down on the top left
+
+- Under **VC++ Directories > All Options**
+  - Add the following to *Include Directories*
+  
+    ````
+    $(KINECTSDK10_DIR)inc
+    $(KINECT_TOOLKIT_DIR)inc
+    ````
+        
+  - Add the following to *Library Directories*
+  
+    ````
+    $(KINECTSDK10_DIR)\lib\x86
+    ````
+    
+- Under **Linker > All Options**
+  - add the following to *Additional Library Directories*
+    
+        ````
+        ..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows
+        ````
+    
+  - add the following under *Additional Dependencies*
+  
+	    ````
+        KinectCommonBridge.lib
+        Kinect10.lib
+	    ````
+
+- Under **Build Events > Post Build Event**
+  - add the following to *Command Line*
+
+	````
+    xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
+    xcopy /e /i /y "..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows\*.dll" "$(ProjectDir)bin"
+    ````
+    
+May require some modification for your specific machine...
