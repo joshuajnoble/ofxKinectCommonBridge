@@ -1,5 +1,7 @@
 #include "ofxKinectCommonBridge.h"
 
+
+
 SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient) {
 
 	cameraRotation.set( orient.absoluteRotation.rotationMatrix.M11, orient.absoluteRotation.rotationMatrix.M12, orient.absoluteRotation.rotationMatrix.M13, orient.absoluteRotation.rotationMatrix.M14,
@@ -205,6 +207,7 @@ void ofxKinectCommonBridge::update()
 		// if mapping depth to color, upscale depth
 		if(mappingDepthToColor) 
 		{
+			//JG: perhaps we shouldn't allocate/deallocate every frame...
 			NUI_COLOR_IMAGE_POINT *pts = new NUI_COLOR_IMAGE_POINT[colorFormat.dwWidth*colorFormat.dwHeight];
 			NUI_DEPTH_IMAGE_PIXEL * depth = new NUI_DEPTH_IMAGE_PIXEL[(depthFormat.dwWidth*depthFormat.dwHeight)];
 			
@@ -240,11 +243,24 @@ void ofxKinectCommonBridge::update()
 			}
 
 		} else {
-
-			for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
-				depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[i] >> 4, 0, depthLookupTable.size()-1 ) ];
-				depthPixelsRaw[i] = depthPixelsRaw[i] >> 4;
+			
+			playersPresent.clear();
+			for(int i = 0; i < MAX_PLAYERS; i++){
+				playerPixels[i].set(0);
 			}
+
+			//TODO: implement player pixels with mapped color
+			for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
+				USHORT playerIndex = NuiDepthPixelToPlayerIndex(depthPixelsRaw[i]);
+				if(playerIndex > 0){
+					playersPresent[playerIndex] = true;	
+					playerPixels[playerIndex-1].getPixels()[i] = 255;
+				}
+				depthPixelsRaw[i] = depthPixelsRaw[i] >> 4; //JG other places i've seen this shift by 3...?
+				depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[i], 0, depthLookupTable.size()-1 ) ];
+			}
+
+
 		}
 
 
@@ -256,6 +272,10 @@ void ofxKinectCommonBridge::update()
 			} else {
 				depthTex.loadData(depthPixels.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 				rawDepthTex.loadData(depthPixelsRaw.getPixels(), depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
+			}
+
+			for(int i = 0; i < MAX_PLAYERS; i++){
+				playerTexture[i].loadData(playerPixels[i]);
 			}
 		}
 	} else {
@@ -293,6 +313,93 @@ void ofxKinectCommonBridge::update()
 	} else {
 		bNeedsUpdateSkeleton = false;
 	}
+}
+
+//------------------------------------
+bool ofxKinectCommonBridge::hasPlayer(int index){
+	if(index < 1 || index > 7){
+		ofLogError("ofxKinectCommonBridge::hasPlayer") << index << " is an invalid player index, use 1-7";
+	}
+	return playersPresent[index];
+}
+
+//------------------------------------
+int ofxKinectCommonBridge::numPlayers(){
+	int numPlayers = 0;
+	map<USHORT,bool>::iterator it;
+	for(it = playersPresent.begin(); it != playersPresent.end(); it++){
+		if(it->second) numPlayers++;
+	}
+	return numPlayers;
+}
+
+//------------------------------------
+vector<int> ofxKinectCommonBridge::getPlayers(){
+	vector<int> players;
+	map<USHORT,bool>::iterator it;
+	for(it = playersPresent.begin(); it != playersPresent.end(); it++){
+		if(it->second) players.push_back(it->first);
+	}
+	return players;
+}
+
+//------------------------------------
+ofPixels& ofxKinectCommonBridge::getPlayerPixels(int index){
+	if(index < 1 || index > 7){
+		ofLogError("ofxKinectCommonBridge::getPlayerPixels") << index << " is an invalid player index, use 1-7";
+	}
+	return playerPixels[index-1];
+}
+
+//------------------------------------
+ofTexture& ofxKinectCommonBridge::getPlayerTexture(int index){
+	if(!bUseTexture){
+		ofLogError("ofxKinectCommonBridge::getPlayerTexture") << "textures are not allocated, please enable useTexture()";
+	}
+	if(index < 1 || index > 7){
+		ofLogError("ofxKinectCommonBridge::getPlayerTexture") << index << " is an invalid player index, use 1-7";
+	}
+	return playerTexture[index-1];
+}
+
+//------------------------------------
+void ofxKinectCommonBridge::drawPlayerTextures(float x, float y){
+	drawPlayerTextures(ofRectangle(x,y,depthFormat.dwWidth,depthFormat.dwHeight));
+}
+
+//------------------------------------
+void ofxKinectCommonBridge::drawPlayerTextures(float x, float y, float w, float h){
+	drawPlayerTextures(ofRectangle(x,y,w,h));
+}
+
+//------------------------------------
+void ofxKinectCommonBridge::drawPlayerTextures(ofPoint point){
+	drawPlayerTextures(ofRectangle(point.x,point.y,depthFormat.dwWidth,depthFormat.dwHeight));
+}
+
+//------------------------------------
+void ofxKinectCommonBridge::drawPlayerTextures(ofRectangle rect){
+	ofColor playerColors[8] = {
+		ofColor::black, //0 - no player
+		ofColor::blue, //1
+		ofColor::red, //2
+		ofColor::green, //3
+		ofColor::orange, //4
+		ofColor::white, //5
+		ofColor::purple, //6
+		ofColor::teal //7
+	};
+
+	ofPushStyle();
+	ofEnableBlendMode(OF_BLENDMODE_ADD);
+	for(int i = 1; i <= MAX_PLAYERS; i++){
+		if(hasPlayer(i)){
+			ofSetColor(playerColors[i]);
+			playerTexture[i-1].draw(rect);
+		}
+	}
+
+	ofPopStyle();
 }
 
 //------------------------------------
@@ -492,6 +599,10 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 		depthPixelsRaw.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		depthPixelsRawBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 
+		for(int i = 0; i < MAX_PLAYERS; i++){
+			playerPixels[i].allocate(depthFormat.dwWidth,depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
+		}
+
 		if(bUseTexture){
 
 			if(bProgrammableRenderer) {
@@ -508,6 +619,10 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 			} else {
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 				rawDepthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
+			}
+
+			for(int i = 0; i < 7; i++){
+				playerTexture[i].allocate(depthFormat.dwWidth,depthFormat.dwHeight, GL_LUMINANCE);
 			}
 		}
 

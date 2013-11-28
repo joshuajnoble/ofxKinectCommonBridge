@@ -6,6 +6,7 @@
 #include "NuiSensor.h"
 #pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
 
+#define MAX_PLAYERS 7
 
 class SkeletonBone
 {
@@ -24,6 +25,7 @@ public:
 	int getEndJoint();
 
 	SkeletonBone( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& bone );
+
 
 private:
 
@@ -90,6 +92,18 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	void drawIR( float x, float y, float w, float h );
 
+	//do we have a player? 1-7 index
+	int numPlayers();
+	bool hasPlayer(int index);
+	vector<int> getPlayers(); //list of all players currently present
+	ofPixels& getPlayerPixels(int index);
+	ofTexture& getPlayerTexture(int index);
+	
+	void drawPlayerTextures(float x, float y);
+	void drawPlayerTextures(float x, float y, float w, float h);
+	void drawPlayerTextures(ofPoint point);
+	void drawPlayerTextures(ofRectangle rect);
+
 	vector<Skeleton> &getSkeletons();
 	void drawSkeleton(int index);
 
@@ -113,9 +127,13 @@ class ofxKinectCommonBridge : protected ofThread {
 	KINECT_IMAGE_FRAME_FORMAT colorFormat;
 	NUI_SKELETON_FRAME k4wSkeletons;
 
+	ofPixels playerPixels[MAX_PLAYERS];
+	ofTexture playerTexture[MAX_PLAYERS];
+
   	bool bInited;
 	bool bStarted;
 	vector<Skeleton> skeletons;
+	map<USHORT,bool> playersPresent;
 
 	//quantize depth buffer to 8 bit range
 	vector<unsigned char> depthLookupTable;
