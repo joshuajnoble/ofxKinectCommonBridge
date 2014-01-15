@@ -115,3 +115,11 @@ So, once you have generated a project that includes ofxKinectCommonBridge:
     ````
     
 May require some modification for your specific machine...
+
+# Using Property Sheets to do all these settings automatically
+
+If you have used the Project Generator to create your project, you can use this route to add all the necessary settings for your project (e.g. include paths, libraries, build steps for copying necessary dll's).
+
+- Open the *Property Manager* for your *Solution* (**View > Other Windows > Property Manager**)
+  - Right click on your project (e.g. `emptyExample`) and select **Add Existing Property Sheet...**
+  - Select the file `addons\ofxKinectCommonBridge\ofxKinectCommonBridge.props`
