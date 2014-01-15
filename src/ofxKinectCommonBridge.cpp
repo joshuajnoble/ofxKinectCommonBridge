@@ -284,7 +284,7 @@ void ofxKinectCommonBridge::update()
 				for ( int j = 0; j < NUI_SKELETON_POSITION_COUNT; j++ ) 
 				{
 					SkeletonBone bone( k4wSkeletons.SkeletonData[i].SkeletonPositions[j], bones[j] );
-					( skeletons.begin())->insert( std::pair<NUI_SKELETON_POSITION_INDEX, SkeletonBone>( NUI_SKELETON_POSITION_INDEX(j), bone ) );
+					skeletons.at(i).insert( std::pair<NUI_SKELETON_POSITION_INDEX, SkeletonBone>( NUI_SKELETON_POSITION_INDEX(j), bone ) );
 				}
 				bNeedsUpdateSkeleton = true;
 			}
@@ -427,7 +427,7 @@ bool ofxKinectCommonBridge::initSensor( int id )
 	UINT count = KinectGetPortIDCount();
 	WCHAR portID[KINECT_MAX_PORTID_LENGTH];
 
-	if( !SUCCEEDED(KinectGetPortIDByIndex( 0, _countof(portID), portID ))) {
+	if( !SUCCEEDED(KinectGetPortIDByIndex( id, _countof(portID), portID ))) {
 		ofLog() << " can't find kinect of ID " << id << endl;
 		return false;
 	}
