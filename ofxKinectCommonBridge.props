@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalLibraryDirectories>$(KINECTSDK10_DIR)\lib\x86;..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>KinectCommonBridge.lib;Kinect10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\include;$(KINECTSDK10_DIR)inc;$(KINECT_TOOLKIT_DIR)inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
+xcopy /e /i /y "..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows\*.dll" "$(ProjectDir)bin"
+%(Command)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
