@@ -1,6 +1,6 @@
 #include "ofxKinectCommonBridge.h"
 
-SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient) {
+SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient, const NUI_SKELETON_POSITION_TRACKING_STATE& trackingState) {
 
 	cameraRotation.set( orient.absoluteRotation.rotationMatrix.M11, orient.absoluteRotation.rotationMatrix.M12, orient.absoluteRotation.rotationMatrix.M13, orient.absoluteRotation.rotationMatrix.M14,
 		orient.absoluteRotation.rotationMatrix.M21, orient.absoluteRotation.rotationMatrix.M22, orient.absoluteRotation.rotationMatrix.M23, orient.absoluteRotation.rotationMatrix.M24,
@@ -19,6 +19,17 @@ SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE
 		orient.hierarchicalRotation.rotationMatrix.M31, orient.hierarchicalRotation.rotationMatrix.M32, orient.hierarchicalRotation.rotationMatrix.M33, orient.hierarchicalRotation.rotationMatrix.M34,
 		orient.hierarchicalRotation.rotationMatrix.M41, orient.hierarchicalRotation.rotationMatrix.M42, orient.hierarchicalRotation.rotationMatrix.M43, orient.hierarchicalRotation.rotationMatrix.M44);
 	
+	switch(trackingState) {
+	case NUI_SKELETON_POSITION_NOT_TRACKED:
+		this->trackingState = NotTracked;
+		break;
+	case NUI_SKELETON_POSITION_INFERRED:
+		this->trackingState = Inferred;
+		break;
+	case NUI_SKELETON_POSITION_TRACKED:
+		this->trackingState = Tracked;
+		break;
+	}
 }
 
 const ofVec3f& SkeletonBone::getStartPosition() {
@@ -47,6 +58,10 @@ const ofMatrix4x4 SkeletonBone::getCameraRotationMatrix() {
 
 int SkeletonBone::getEndJoint() {
 	return endJoint;
+}
+
+SkeletonBone::TrackingState SkeletonBone::getTrackingState() {
+	return trackingState;
 }
 
 const ofVec3f SkeletonBone::getScreenPosition() {
@@ -283,8 +298,8 @@ void ofxKinectCommonBridge::update()
 
 				for ( int j = 0; j < NUI_SKELETON_POSITION_COUNT; j++ ) 
 				{
-					SkeletonBone bone( k4wSkeletons.SkeletonData[i].SkeletonPositions[j], bones[j] );
-					( skeletons.begin())->insert( std::pair<NUI_SKELETON_POSITION_INDEX, SkeletonBone>( NUI_SKELETON_POSITION_INDEX(j), bone ) );
+					SkeletonBone bone( k4wSkeletons.SkeletonData[i].SkeletonPositions[j], bones[j], k4wSkeletons.SkeletonData[i].eSkeletonPositionTrackingState[j] );
+					skeletons.at(i).insert( std::pair<NUI_SKELETON_POSITION_INDEX, SkeletonBone>( NUI_SKELETON_POSITION_INDEX(j), bone ) );
 				}
 				bNeedsUpdateSkeleton = true;
 			}
