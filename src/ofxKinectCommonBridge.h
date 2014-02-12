@@ -12,6 +12,11 @@
 class SkeletonBone
 {
 public:
+	enum TrackingState {
+		NotTracked,
+		Tracked,
+		Inferred
+	};
 	// lots of constness because we're putting these in a map and that
 	// copies stuff all over the place
 	const ofQuaternion getCameraRotation();
@@ -25,7 +30,9 @@ public:
 	const int getStartJoint();
 	int getEndJoint();
 
-	SkeletonBone( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& bone );
+	TrackingState getTrackingState();
+
+	SkeletonBone( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& bone, const NUI_SKELETON_POSITION_TRACKING_STATE& trackingState );
 
 private:
 
@@ -35,6 +42,7 @@ private:
 	ofVec3f	position;
 	ofMatrix4x4	rotation;
 	ofVec2f screenPosition;
+	TrackingState trackingState;
 };
 
 typedef map<_NUI_SKELETON_POSITION_INDEX, SkeletonBone> Skeleton;
