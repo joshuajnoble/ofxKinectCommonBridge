@@ -7,6 +7,28 @@
 #pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
 
 
+class ofxKCBFace  {
+
+public:
+
+	ofVec2f facePosition;
+	ofMesh faceMesh;
+
+};
+
+class ofxKCBSpeechEvent : public ofEventArgs
+{
+
+public:
+
+    ULONG       ulStreamNum;
+    ULONGLONG   ullAudioStreamOffset;
+    WPARAM      wParam;
+    LPARAM      lParam;
+
+
+};
+
 class SkeletonBone
 {
 public:
@@ -53,9 +75,18 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool initSensor( int id = 0 );
 	bool initDepthStream( int width, int height, bool nearMode = false, bool mapDepthToColor = false );
 	bool initColorStream( int width, int height, bool mapColorToDepth = false );
+	bool initFaceTracking(); // no params, can't use with other stuff either.
 	bool initIRStream( int width, int height );
 	bool initSkeletonStream( bool seated );
 	bool start();
+
+	// face tracking
+	bool startFaceTracking();
+
+	// audio functionality
+	bool startAudioStream();
+	bool startSpeech();
+	bool loadGrammar(string filename);
 
 	void stop();
 
@@ -114,6 +145,12 @@ class ofxKinectCommonBridge : protected ofThread {
 		return videoTex;
 	}
 
+	// face tracking
+	ofTexture &getFaceTrackingTexture()
+	{
+		return faceTrackingTexture;
+	}
+
   private:
 
     KCBHANDLE hKinect;
@@ -133,10 +170,15 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bNearWhite;
 	float nearClipping, farClipping;
 
+	void updateFaceTrackingData();
+
   	bool bUseTexture;
 	ofTexture depthTex; ///< the depth texture
 	ofTexture rawDepthTex; ///<
 	ofTexture videoTex; ///< the RGB texture
+
+	// face
+	ofTexture faceTrackingTexture;
 	//ofTexture irTex;
 
 	ofPixels videoPixels;
@@ -158,6 +200,25 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bNeedsUpdateSkeleton;
 	bool bIsSkeletonFrameNew;
 	bool bProgrammableRenderer;
+
+	// speech
+	bool bHasLoadedGrammar;
+	bool bUsingSpeech;
+	string grammarFile;
+	float speechConfidenceThreshold; // make a way to set this
+
+	// audio
+	bool bUsingAudio;
+
+	// face
+	bool bIsTrackingFace;
+	ofxKCBFace faceData; // only single face at the moment
+	// camera params for face tracking
+	FT_CAMERA_CONFIG depthCameraConfig;
+	FT_CAMERA_CONFIG videoCameraConfig;
+    FLOAT pSUCoef;
+    FLOAT zoomFactor;
+
 
 	bool bVideoIsInfrared;
 	bool bUsingSkeletons;

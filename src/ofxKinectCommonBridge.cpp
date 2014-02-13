@@ -648,6 +648,22 @@ bool ofxKinectCommonBridge::initIRStream( int width, int height )
 	return true;
 }
 
+bool ofxKinectCommonBridge::initFaceTracking() {
+
+
+	// initialize camera parmas
+	videoCameraConfig.Height = 480;
+	videoCameraConfig.Width = 640;
+	videoCameraConfig.FocalLength = NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+
+	depthCameraConfig.Height = 240;
+	depthCameraConfig.Width = 320;
+	depthCameraConfig.FocalLength = NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+
+	KinectEnableFaceTracking(hKinect);
+	return true;
+}
+
 bool ofxKinectCommonBridge::initSkeletonStream( bool seated )
 {
 	if(bStarted){
@@ -706,6 +722,97 @@ bool ofxKinectCommonBridge::start()
 	return true;
 }
 
+// if you don't load a grammar we can just use the basic
+bool ofxKinectCommonBridge::loadGrammar( string filename )
+{
+	bHasLoadedGrammar = true;
+
+	return true; // make this non stupid
+}
+
+void ofxKinectCommonBridge::updateFaceTrackingData()
+{
+
+	HRESULT hr;
+
+	IFTImage* ftImage; // don't allocate?
+	HRESULT res = GetFaceTrackingImage(hKinect, &ftImage);
+
+	faceData.facePosition.set(GetXCenterFace(hKinect), GetYCenterFace(hKinect));
+
+	IFTFaceTracker* faceTracker;
+	res = GetFaceTracker(hKinect, &faceTracker);
+
+	IFTModel *model;
+	faceTracker->GetFaceModel(&model);
+
+	IFTResult *result;
+	KinectGetFaceTrackingResult(hKinect, &result);
+
+	// make some points we can use
+	FT_VECTOR2D* pPts2D = new FT_VECTOR2D[model->GetVertexCount()];
+
+	FLOAT *AUCoefficients;
+    UINT AUCount;
+    hr = result->GetAUCoefficients(&AUCoefficients, &AUCount);
+
+
+    FLOAT scale, rotationXYZ[3], translationXYZ[3];
+    hr = result->Get3DPose(&scale, rotationXYZ, translationXYZ);
+
+	POINT viewOffset;
+	viewOffset.x = 0.f;
+	viewOffset.y = 0.f;
+
+	hr = model->GetProjectedShape(&videoCameraConfig, zoomFactor, viewOffset, &pSUCoef, model->GetSUCount(), AUCoefficients, AUCount, scale, rotationXYZ, translationXYZ, pPts2D, model->GetVertexCount());
+
+	POINT* p3DMdl = new POINT[model->GetVertexCount()];
+
+    for (UINT i = 0; i<model->GetVertexCount(); ++i)
+    {
+        p3DMdl[i].x = LONG(pPts2D[i].x + 0.5f);
+        p3DMdl[i].y = LONG(pPts2D[i].y + 0.5f);
+    }
+
+	for( UINT i = 0; i<model->GetVertexCount(); i++) 
+	{
+		ofVec3f v(p3DMdl[i].x, p3DMdl[i].y, 0);
+		faceData.faceMesh.getVertices().push_back(v);
+	}
+
+	// make nice triangles
+	FT_TRIANGLE *triangles;
+	UINT triangleCount;
+	model->GetTriangles(&triangles, &triangleCount);
+
+	for ( UINT i = 0; i < triangleCount; i++ )
+	{
+
+		faceData.faceMesh.addTriangle( triangles[i].i, triangles[i].j, triangles[i].k );
+
+		i++;
+	}
+}
+
+//bool ofxKinectCommonBridge::startSpeech()
+//{
+//
+//	KCB_SPEECH_LANGUAGE *lang;
+//	ULONGLONG interest;
+//	bool adaptive = true;
+//
+//	KinectEnableSpeech(hKinect, (const WCHAR*) grammarFile.c_str(), lang, &interest, &adaptive);
+//	KinectStartSpeech(hKinect);
+//
+//	bUsingSpeech = true;
+//
+//}
+
+//bool ofxKinectCommonBridge::startAudioStream()
+//{
+//
+//}
+
 //----------------------------------------------------------
 void ofxKinectCommonBridge::stop() {
 	if(bStarted){
@@ -725,7 +832,8 @@ void ofxKinectCommonBridge::stop() {
 		}
 
 	}
-}	
+}
+
 
 //----------------------------------------------------------
 void ofxKinectCommonBridge::threadedFunction(){
@@ -767,6 +875,69 @@ void ofxKinectCommonBridge::threadedFunction(){
 			if( KinectIsSkeletonFrameReady(hKinect) && SUCCEEDED ( KinectGetSkeletonFrame(hKinect, &k4wSkeletons )) ) 
 			{
 				bNeedsUpdateSkeleton = true;
+			}
+		}
+
+		//if(bUsingSpeech)
+		//{
+		//	if(KinectIsSpeechEventReady(hKinect))
+		//	{
+		//		// dispatch an event
+		//		//https://github.com/Traksewt/molecular-control-toolkit/blob/master/Controllers/KinectNativeController/SpeechBasics.cpp
+		//		SPEVENT spevent;
+		//		ULONG fetched;
+		//		HRESULT hr = S_OK;
+		//		KinectGetSpeechEvent(hKinect, &spevent, &fetched);
+
+		//		// just look for speech events here. can+should be optimized
+		//		while (fetched > 0)
+		//		{
+		//			switch (spevent.eEventId)
+		//			{
+		//				case SPEI_RECOGNITION:
+		//					if (SPET_LPARAM_IS_OBJECT == spevent.elParamType)
+		//					{
+		//						// this is an ISpRecoResult
+		//						ISpRecoResult* result = reinterpret_cast<ISpRecoResult*>(spevent.lParam);
+		//						SPPHRASE* pPhrase = NULL;
+  //                  
+		//						hr = result->GetPhrase(&pPhrase);
+		//						if (SUCCEEDED(hr))
+		//						{
+		//							if ((pPhrase->pProperties != NULL) && (pPhrase->pProperties->pFirstChild != NULL))
+		//							{
+		//								const SPPHRASEPROPERTY* pSemanticTag = pPhrase->pProperties->pFirstChild;
+		//								if (pSemanticTag->SREngineConfidence > speechConfidenceThreshold)
+		//								{
+
+		//								}
+		//							}
+		//							// necessary?
+		//							::CoTaskMemFree(pPhrase);
+		//						}
+		//					}
+		//					break;
+		//			}
+
+		//			KinectGetSpeechEvent(hKinect, &spevent, &fetched);
+		//		}
+		//	}
+		//}
+
+		if(bUsingAudio)
+		{
+			
+		}
+
+		if(bIsTrackingFace)
+		{
+			IFTResult *ftResult;
+			HRESULT hr = KinectGetFaceTrackingResult( hKinect, &ftResult );
+
+			if(hr == S_OK) {
+
+				updateFaceTrackingData();
+
 			}
 		}
 
