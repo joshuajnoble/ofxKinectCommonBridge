@@ -1,5 +1,8 @@
 #include "ofxKinectCommonBridge.h"
 
+// speech event declaration
+ofEvent<ofxKCBSpeechEvent> ofxKCBSpeechEvent::event;
+
 SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient, const NUI_SKELETON_POSITION_TRACKING_STATE& trackingState) {
 
 	cameraRotation.set( orient.absoluteRotation.rotationMatrix.M11, orient.absoluteRotation.rotationMatrix.M12, orient.absoluteRotation.rotationMatrix.M13, orient.absoluteRotation.rotationMatrix.M14,
@@ -307,6 +310,17 @@ void ofxKinectCommonBridge::update()
 
 	} else {
 		bNeedsUpdateSkeleton = false;
+	}
+
+	if(bUpdateSpeech)
+	{
+		ofxKCBSpeechEvent spEvent;
+		spEvent.detectedSpeech = speechData.detectedSpeech;
+		spEvent.confidence = speechData.confidence;
+
+		ofNotifyEvent( ofxKCBSpeechEvent::event, spEvent, this);
+
+		bUpdateSpeech = false;
 	}
 }
 
@@ -794,19 +808,27 @@ void ofxKinectCommonBridge::updateFaceTrackingData()
 	}
 }
 
-//bool ofxKinectCommonBridge::startSpeech()
-//{
-//
-//	KCB_SPEECH_LANGUAGE *lang;
-//	ULONGLONG interest;
-//	bool adaptive = true;
-//
-//	KinectEnableSpeech(hKinect, (const WCHAR*) grammarFile.c_str(), lang, &interest, &adaptive);
-//	KinectStartSpeech(hKinect);
-//
-//	bUsingSpeech = true;
-//
-//}
+bool ofxKinectCommonBridge::startSpeech()
+{
+
+	KCB_SPEECH_LANGUAGE *lang;
+	ULONGLONG interest;
+	bool adaptive = true;
+
+	HRESULT hr; 
+
+	KinectEnableSpeech(hKinect, (const WCHAR*) grammarFile.c_str(), lang, &interest, &adaptive);
+
+	hr = KinectStartSpeech(hKinect);
+	if(hr != S_OK)
+	{
+		ofLogError(" ofxKinectCommonBridge::startSpeech cannot start speech" );
+		return false;
+	}
+
+	bUsingSpeech = true;
+	return true;
+}
 
 //bool ofxKinectCommonBridge::startAudioStream()
 //{
@@ -878,51 +900,57 @@ void ofxKinectCommonBridge::threadedFunction(){
 			}
 		}
 
-		//if(bUsingSpeech)
-		//{
-		//	if(KinectIsSpeechEventReady(hKinect))
-		//	{
-		//		// dispatch an event
-		//		//https://github.com/Traksewt/molecular-control-toolkit/blob/master/Controllers/KinectNativeController/SpeechBasics.cpp
-		//		SPEVENT spevent;
-		//		ULONG fetched;
-		//		HRESULT hr = S_OK;
-		//		KinectGetSpeechEvent(hKinect, &spevent, &fetched);
+		if(bUsingSpeech)
+		{
+			if(KinectIsSpeechEventReady(hKinect))
+			{
+				// dispatch an event
+				//https://github.com/Traksewt/molecular-control-toolkit/blob/master/Controllers/KinectNativeController/SpeechBasics.cpp
+				SPEVENT spevent;
+				ULONG fetched;
+				HRESULT hr = S_OK;
+				KinectGetSpeechEvent(hKinect, &spevent, &fetched);
 
-		//		// just look for speech events here. can+should be optimized
-		//		while (fetched > 0)
-		//		{
-		//			switch (spevent.eEventId)
-		//			{
-		//				case SPEI_RECOGNITION:
-		//					if (SPET_LPARAM_IS_OBJECT == spevent.elParamType)
-		//					{
-		//						// this is an ISpRecoResult
-		//						ISpRecoResult* result = reinterpret_cast<ISpRecoResult*>(spevent.lParam);
-		//						SPPHRASE* pPhrase = NULL;
-  //                  
-		//						hr = result->GetPhrase(&pPhrase);
-		//						if (SUCCEEDED(hr))
-		//						{
-		//							if ((pPhrase->pProperties != NULL) && (pPhrase->pProperties->pFirstChild != NULL))
-		//							{
-		//								const SPPHRASEPROPERTY* pSemanticTag = pPhrase->pProperties->pFirstChild;
-		//								if (pSemanticTag->SREngineConfidence > speechConfidenceThreshold)
-		//								{
+				// just look for speech events here. can+should be optimized
+				while (fetched > 0)
+				{
+					switch (spevent.eEventId)
+					{
+						case SPEI_RECOGNITION:
+							if (SPET_LPARAM_IS_OBJECT == spevent.elParamType)
+							{
+								// this is an ISpRecoResult
+								ISpRecoResult* result = reinterpret_cast<ISpRecoResult*>(spevent.lParam);
+								SPPHRASE* pPhrase = NULL;
+                    
+								hr = result->GetPhrase(&pPhrase);
+								if (SUCCEEDED(hr))
+								{
+									if ((pPhrase->pProperties != NULL) && (pPhrase->pProperties->pFirstChild != NULL))
+									{
+										const SPPHRASEPROPERTY* pSemanticTag = pPhrase->pProperties->pFirstChild;
+										if (pSemanticTag->SREngineConfidence > speechConfidenceThreshold)
+										{
+											//updateSpeechData( pSemanticTag );
+											bUpdateSpeech = true;
+											char pmbbuf[255];
+											int size = wcstombs(&pmbbuf[0], pSemanticTag->pszValue, 255);
+											speechData.detectedSpeech = pmbbuf;
+											speechData.detectedSpeech.resize(size+1);
+											speechData.confidence = pSemanticTag->SREngineConfidence;
+										}
+									}
+									// necessary?
+									::CoTaskMemFree(pPhrase);
+								}
+							}
+							break;
+					}
 
-		//								}
-		//							}
-		//							// necessary?
-		//							::CoTaskMemFree(pPhrase);
-		//						}
-		//					}
-		//					break;
-		//			}
-
-		//			KinectGetSpeechEvent(hKinect, &spevent, &fetched);
-		//		}
-		//	}
-		//}
+					KinectGetSpeechEvent(hKinect, &spevent, &fetched);
+				}
+			}
+		}
 
 		if(bUsingAudio)
 		{
@@ -937,6 +965,7 @@ void ofxKinectCommonBridge::threadedFunction(){
 			if(hr == S_OK) {
 
 				updateFaceTrackingData();
+				bUpdateFaces;
 
 			}
 		}

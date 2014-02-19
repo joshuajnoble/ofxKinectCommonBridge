@@ -1,13 +1,17 @@
-#include "ofMain.h"
+//#include "ofMain.h"
+//#define _AFXDLL
+//#include "WinBase.h"
+//#include "afxwin.h"
+//#include "ofMain.h"
 #include "testApp.h"
 
-#include "ofGLProgrammableRenderer.h"
+//#include "ofGLProgrammableRenderer.h"
 
 //========================================================================
 int main( ){
 
-	ofPtr<ofBaseRenderer> renderer(new ofGLProgrammableRenderer(true));
-	ofSetCurrentRenderer(renderer);
+	//ofPtr<ofBaseRenderer> renderer(new ofGLProgrammableRenderer(true));
+	//ofSetCurrentRenderer(renderer);
 
 	ofSetupOpenGL(1024,768, OF_WINDOW);			// <-------- setup the GL context
 

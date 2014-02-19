@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ofMain.h"
-
 #include "KinectCommonBridgeLib.h"
 #include "NuiSensor.h"
+#include "ofMain.h" // this MUST come after KCB!!! Not sure you need NuiSensor.h if using KCB
+
 #pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
 
 
@@ -16,17 +16,24 @@ public:
 
 };
 
+// if you want to use events, subscribe to this, otherwise
 class ofxKCBSpeechEvent : public ofEventArgs
 {
 
 public:
 
-    ULONG       ulStreamNum;
-    ULONGLONG   ullAudioStreamOffset;
-    WPARAM      wParam;
-    LPARAM      lParam;
+	std::string detectedSpeech;
+	int confidence;
 
+	static ofEvent<ofxKCBSpeechEvent> event;
 
+};
+
+// poll for this very simple data object for speech data
+class SpeechData {
+public:
+	std::string detectedSpeech;
+	int confidence;
 };
 
 class SkeletonBone
@@ -87,6 +94,10 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool startAudioStream();
 	bool startSpeech();
 	bool loadGrammar(string filename);
+
+	// speech
+	bool hasNewSpeechData();
+	SpeechData getNewSpeechData();
 
 	void stop();
 
@@ -199,12 +210,16 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bNeedsUpdateDepth;
 	bool bNeedsUpdateSkeleton;
 	bool bIsSkeletonFrameNew;
+	bool bUpdateSpeech;
+	bool bUpdateFaces;
+
 	bool bProgrammableRenderer;
 
 	// speech
 	bool bHasLoadedGrammar;
 	bool bUsingSpeech;
 	string grammarFile;
+	SpeechData speechData;
 	float speechConfidenceThreshold; // make a way to set this
 
 	// audio

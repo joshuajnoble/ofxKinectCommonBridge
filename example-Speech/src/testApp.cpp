@@ -4,14 +4,7 @@
 void testApp::setup(){
 
 	kinect.initSensor();
-	//kinect.initIRStream(640, 480);
-	kinect.initColorStream(640, 480, true);
-	kinect.initDepthStream(640, 480, true);
-	//kinect.initSkeletonStream(true);
-
-	//simple start
-	kinect.start();
-	ofDisableAlphaBlending(); //Kinect alpha channel is default 0;
+	kinect.startSpeech();
 }
 
 //--------------------------------------------------------------
@@ -22,8 +15,14 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw()
 {
-	kinect.draw(0,0);
-	kinect.drawDepth(100, 0);
+	
+}
+
+void testApp::speechEvent( ofxKCBSpeechEvent & speechEvt )
+{
+	cout << " got speech event " << endl;
+	cout << " detected " << speechEvt.detectedSpeech << endl;
+	cout << " confidence " << speechEvt.confidence << endl;
 }
 
 //--------------------------------------------------------------
