@@ -173,6 +173,10 @@ class ofxKinectCommonBridge : protected ofThread {
 		return faceTrackingTexture;
 	}
 
+	void setSpeechGrammarFile(string path) {
+		grammarFile = path;
+	}
+
   private:
 
     KCBHANDLE hKinect;

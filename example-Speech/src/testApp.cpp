@@ -4,6 +4,7 @@
 void testApp::setup(){
 
 	kinect.initSensor(0);
+	kinect.setSpeechGrammarFile(ofToDataPath("/grammar/en-US.grxml", true));
 	kinect.initSpeech();
 	kinect.start();
 }

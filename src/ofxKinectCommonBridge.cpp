@@ -840,12 +840,12 @@ bool ofxKinectCommonBridge::initSpeech()
 	HRESULT hr; 
 
 	// testing
-	string path = "C:\\en-US.grxml";
+	//string path = "C:\\en-US.grxml";
 	//WCHAR file[255];
 	
-	int sz = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, NULL, 0);
+	int sz = MultiByteToWideChar(CP_UTF8, 0, grammarFile.c_str(), -1, NULL, 0);
 	WCHAR *file = new WCHAR[sz];
-	MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, file, sz);
+	MultiByteToWideChar(CP_UTF8, 0, grammarFile.c_str(), -1, file, sz);
 
 	KinectEnableSpeech(hKinect, &file[0], NULL, NULL, &adaptive);
 
