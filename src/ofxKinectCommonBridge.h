@@ -11,8 +11,19 @@ class ofxKCBFace  {
 
 public:
 
-	ofVec2f facePosition;
-	ofMesh faceMesh;
+	enum FACE_POSITIONS {
+
+	};
+
+	enum FEATURE {
+		LEFT_EYE, RIGHT_EYE, MOUTH, NOSE, CHIN, LEFT_EAR, RIGHT_EAR
+	};
+
+	ofVec2f position;
+	ofMesh mesh;
+	
+	ofVec3f getLocationByIdentifier(FACE_POSITIONS position);
+	ofRectangle getFeatureBounding(FACE_POSITIONS position);
 
 };
 
@@ -92,7 +103,7 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	// audio functionality
 	bool startAudioStream();
-	bool startSpeech();
+	bool initSpeech();
 	bool loadGrammar(string filename);
 
 	// speech
@@ -227,7 +238,8 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	// face
 	bool bIsTrackingFace;
-	ofxKCBFace faceData; // only single face at the moment
+	// double buffer for faces
+	ofxKCBFace faceDataBack, faceData; // only single face at the moment
 	// camera params for face tracking
 	FT_CAMERA_CONFIG depthCameraConfig;
 	FT_CAMERA_CONFIG videoCameraConfig;

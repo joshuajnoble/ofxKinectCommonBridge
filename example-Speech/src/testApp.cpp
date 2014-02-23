@@ -3,8 +3,9 @@
 //--------------------------------------------------------------
 void testApp::setup(){
 
-	kinect.initSensor();
-	kinect.startSpeech();
+	kinect.initSensor(0);
+	kinect.initSpeech();
+	kinect.start();
 }
 
 //--------------------------------------------------------------

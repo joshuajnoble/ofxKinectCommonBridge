@@ -3,6 +3,20 @@
 // speech event declaration
 ofEvent<ofxKCBSpeechEvent> ofxKCBSpeechEvent::event;
 
+ofVec3f ofxKCBFace::getLocationByIdentifier(FACE_POSITIONS position)
+{
+	return mesh.getVertex( (int) position );
+}
+
+ofRectangle ofxKCBFace::getFeatureBounding(FACE_POSITIONS position)
+{
+	//return mesh.getVertex( (int) position );
+	// find the bounding box for all the features and return;
+
+	ofRectangle bounds;
+	return bounds;
+}
+
 SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient, const NUI_SKELETON_POSITION_TRACKING_STATE& trackingState) {
 
 	cameraRotation.set( orient.absoluteRotation.rotationMatrix.M11, orient.absoluteRotation.rotationMatrix.M12, orient.absoluteRotation.rotationMatrix.M13, orient.absoluteRotation.rotationMatrix.M14,
@@ -83,6 +97,8 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bVideoIsInfrared = false;
 	bInited = false;
 	bStarted = false;
+	bIsTrackingFace = false;
+	bUsingSpeech = false;
 
 	mappingColorToDepth = false;
 	mappingDepthToColor = false;
@@ -321,6 +337,12 @@ void ofxKinectCommonBridge::update()
 		ofNotifyEvent( ofxKCBSpeechEvent::event, spEvent, this);
 
 		bUpdateSpeech = false;
+	}
+
+	if(bUpdateSpeech)
+	{
+		//swap<ofxKCBFace>( faceData, faceDataBack ); // copy it in, need lock?
+		faceData = faceDataBack;
 	}
 }
 
@@ -752,7 +774,7 @@ void ofxKinectCommonBridge::updateFaceTrackingData()
 	IFTImage* ftImage; // don't allocate?
 	HRESULT res = GetFaceTrackingImage(hKinect, &ftImage);
 
-	faceData.facePosition.set(GetXCenterFace(hKinect), GetYCenterFace(hKinect));
+	faceDataBack.position.set(GetXCenterFace(hKinect), GetYCenterFace(hKinect));
 
 	IFTFaceTracker* faceTracker;
 	res = GetFaceTracker(hKinect, &faceTracker);
@@ -791,7 +813,7 @@ void ofxKinectCommonBridge::updateFaceTrackingData()
 	for( UINT i = 0; i<model->GetVertexCount(); i++) 
 	{
 		ofVec3f v(p3DMdl[i].x, p3DMdl[i].y, 0);
-		faceData.faceMesh.getVertices().push_back(v);
+		faceDataBack.mesh.getVertices().push_back(v);
 	}
 
 	// make nice triangles
@@ -802,22 +824,30 @@ void ofxKinectCommonBridge::updateFaceTrackingData()
 	for ( UINT i = 0; i < triangleCount; i++ )
 	{
 
-		faceData.faceMesh.addTriangle( triangles[i].i, triangles[i].j, triangles[i].k );
+		faceDataBack.mesh.addTriangle( triangles[i].i, triangles[i].j, triangles[i].k );
 
 		i++;
 	}
 }
 
-bool ofxKinectCommonBridge::startSpeech()
+bool ofxKinectCommonBridge::initSpeech()
 {
 
-	KCB_SPEECH_LANGUAGE *lang;
+	//KCB_SPEECH_LANGUAGE *lang;
 	ULONGLONG interest;
-	bool adaptive = true;
+	bool adaptive = false;
 
 	HRESULT hr; 
 
-	KinectEnableSpeech(hKinect, (const WCHAR*) grammarFile.c_str(), lang, &interest, &adaptive);
+	// testing
+	string path = "C:\\en-US.grxml";
+	//WCHAR file[255];
+	
+	int sz = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, NULL, 0);
+	WCHAR *file = new WCHAR[sz];
+	MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, file, sz);
+
+	KinectEnableSpeech(hKinect, &file[0], NULL, NULL, &adaptive);
 
 	hr = KinectStartSpeech(hKinect);
 	if(hr != S_OK)
@@ -827,6 +857,7 @@ bool ofxKinectCommonBridge::startSpeech()
 	}
 
 	bUsingSpeech = true;
+	bInited = true;
 	return true;
 }
 
@@ -965,7 +996,7 @@ void ofxKinectCommonBridge::threadedFunction(){
 			if(hr == S_OK) {
 
 				updateFaceTrackingData();
-				bUpdateFaces;
+				bUpdateFaces = true;
 
 			}
 		}
