@@ -339,7 +339,7 @@ void ofxKinectCommonBridge::update()
 		bUpdateSpeech = false;
 	}
 
-	if(bUpdateSpeech)
+	if(bUpdateFaces)
 	{
 		//swap<ofxKCBFace>( faceData, faceDataBack ); // copy it in, need lock?
 		faceData = faceDataBack;
@@ -742,10 +742,10 @@ bool ofxKinectCommonBridge::start()
 	}
 
 	if(!bInited){
-		cout << "init stuff" << endl;
+		cout << " init default streams " << endl;
 
-		initColorStream(640,480);
-		initDepthStream(320,240);
+		//initColorStream(640,480);
+		//initDepthStream(320,240);
 	}
 
     HRESULT hr = KinectStartStreams(hKinect);
@@ -828,6 +828,16 @@ void ofxKinectCommonBridge::updateFaceTrackingData()
 
 		i++;
 	}
+}
+
+bool ofxKinectCommonBridge::initAudio()
+{
+	AEC_SYSTEM_MODE mode = OPTIBEAM_ARRAY_ONLY;
+	KinectEnableAudioStream(hKinect, &mode, false);
+	if(KinectStartAudioStream(hKinect)) {
+		return true;
+	}
+	return false;
 }
 
 bool ofxKinectCommonBridge::initSpeech()

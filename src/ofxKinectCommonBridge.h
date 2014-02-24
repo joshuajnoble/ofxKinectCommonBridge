@@ -176,6 +176,7 @@ class ofxKinectCommonBridge : protected ofThread {
 	void setSpeechGrammarFile(string path) {
 		grammarFile = path;
 	}
+	bool initAudio();
 
   private:
 

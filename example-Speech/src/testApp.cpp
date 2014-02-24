@@ -4,7 +4,10 @@
 void testApp::setup(){
 
 	kinect.initSensor(0);
-	kinect.setSpeechGrammarFile(ofToDataPath("/grammar/en-US.grxml", true));
+	//string grammarPath = ofToDataPath("grammar/en-US.grxml", true);
+	string grammarPath = "C:\\en-US.grxml";
+	kinect.setSpeechGrammarFile(grammarPath);
+	kinect.initAudio();
 	kinect.initSpeech();
 	kinect.start();
 }
