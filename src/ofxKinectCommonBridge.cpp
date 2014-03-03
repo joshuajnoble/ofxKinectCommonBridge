@@ -834,7 +834,8 @@ bool ofxKinectCommonBridge::initAudio()
 {
 	AEC_SYSTEM_MODE mode = OPTIBEAM_ARRAY_ONLY;
 	KinectEnableAudioStream(hKinect, &mode, false);
-	if(KinectStartAudioStream(hKinect)) {
+	HRESULT hr = KinectStartAudioStream(hKinect);
+	if( SUCCEEDED(hr)) {
 		return true;
 	}
 	return false;
