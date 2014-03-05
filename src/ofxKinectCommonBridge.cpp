@@ -707,6 +707,11 @@ bool ofxKinectCommonBridge::start()
 }
 
 //----------------------------------------------------------
+KCBHANDLE ofxKinectCommonBridge::getHandle() const {
+	return this->handle;
+}
+
+//----------------------------------------------------------
 void ofxKinectCommonBridge::stop() {
 	if(bStarted){
 		waitForThread(true);
