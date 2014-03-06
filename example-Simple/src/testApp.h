@@ -1,7 +1,6 @@
 #pragma once
-
-#include "ofMain.h"
 #include "ofxKinectCommonBridge.h"
+#include "ofMain.h"
 
 class testApp : public ofBaseApp{
 	public:

@@ -99,6 +99,7 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bStarted = false;
 	bIsTrackingFace = false;
 	bUsingSpeech = false;
+	bUseStreams = true;
 
 	mappingColorToDepth = false;
 	mappingDepthToColor = false;
@@ -106,6 +107,8 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bUsingSkeletons = false;
   	bUseTexture = true;
 	bProgrammableRenderer = false;
+
+	bIsFaceNew = false;
 	
 	setDepthClipping();
 }
@@ -147,6 +150,11 @@ bool ofxKinectCommonBridge::isFrameNewDepth(){
 bool ofxKinectCommonBridge::isNewSkeleton() {
 	return bNeedsUpdateSkeleton;
 }
+
+ofxKCBFace& ofxKinectCommonBridge::getFaceData() {
+	return faceData;
+}
+
 
 vector<Skeleton> &ofxKinectCommonBridge::getSkeletons() {
 	return skeletons;
@@ -343,6 +351,7 @@ void ofxKinectCommonBridge::update()
 	{
 		//swap<ofxKCBFace>( faceData, faceDataBack ); // copy it in, need lock?
 		faceData = faceDataBack;
+		bIsFaceNew = false;
 	}
 }
 
@@ -365,6 +374,13 @@ ofShortPixels & ofxKinectCommonBridge::getRawDepthPixelsRef(){
 void ofxKinectCommonBridge::setUseTexture(bool bUse){
 	bUseTexture = bUse;
 }
+
+//------------------------------------
+
+void ofxKinectCommonBridge::setUseStreams(bool bUse){
+	bUseStreams = bUse;
+}
+
 
 //----------------------------------------------------------
 void ofxKinectCommonBridge::draw(float _x, float _y, float _w, float _h) {
@@ -615,11 +631,13 @@ bool ofxKinectCommonBridge::initColorStream( int width, int height, bool mapColo
 		ofLog() << "allocating a buffer of size " << colorFormat.dwWidth*colorFormat.dwHeight*sizeof(unsigned char)*4 << " when k4w wants size " << colorFormat.cbBufferSize << endl;
 		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
 		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
-		if(bUseTexture){
+		if(bUseTexture)
+		{
 			videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
 		}
 	}
-	else{
+	else
+	{
 		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
@@ -688,15 +706,21 @@ bool ofxKinectCommonBridge::initFaceTracking() {
 
 
 	// initialize camera parmas
-	videoCameraConfig.Height = 480;
-	videoCameraConfig.Width = 640;
-	videoCameraConfig.FocalLength = NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+	//videoCameraConfig.Height = 480;
+	//videoCameraConfig.Width = 640;
+	//videoCameraConfig.FocalLength = NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
 
-	depthCameraConfig.Height = 240;
-	depthCameraConfig.Width = 320;
-	depthCameraConfig.FocalLength = NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+	//depthCameraConfig.Height = 480;
+	//depthCameraConfig.Width = 480;
+	//depthCameraConfig.FocalLength = NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+
+	initColorStream(640, 480);
+	initDepthStream(320, 240, true);
 
 	KinectEnableFaceTracking(hKinect);
+
+	bIsTrackingFace = true;
+
 	return true;
 }
 
@@ -741,11 +765,11 @@ bool ofxKinectCommonBridge::start()
 		initSensor();
 	}
 
-	if(!bInited){
+	if(!bInited && bUseStreams){
 		cout << " init default streams " << endl;
 
-		//initColorStream(640,480);
-		//initDepthStream(320,240);
+		initColorStream(640,480);
+		initDepthStream(320,240);
 	}
 
     HRESULT hr = KinectStartStreams(hKinect);
@@ -823,9 +847,7 @@ void ofxKinectCommonBridge::updateFaceTrackingData()
 
 	for ( UINT i = 0; i < triangleCount; i++ )
 	{
-
 		faceDataBack.mesh.addTriangle( triangles[i].i, triangles[i].j, triangles[i].k );
-
 		i++;
 	}
 }
@@ -1002,13 +1024,16 @@ void ofxKinectCommonBridge::threadedFunction(){
 		if(bIsTrackingFace)
 		{
 			IFTResult *ftResult;
-			HRESULT hr = KinectGetFaceTrackingResult( hKinect, &ftResult );
+			if(KinectIsDepthFrameReady( hKinect ) && KinectIsColorFrameReady(hKinect) ) 
+			{
+				HRESULT hr = KinectGetFaceTrackingResult( hKinect, &ftResult );
 
-			if(hr == S_OK) {
+				if(hr == S_OK) {
 
-				updateFaceTrackingData();
-				bUpdateFaces = true;
+					updateFaceTrackingData();
+					bUpdateFaces = true;
 
+				}
 			}
 		}
 

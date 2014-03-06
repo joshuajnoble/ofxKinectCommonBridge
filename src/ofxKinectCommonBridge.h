@@ -98,9 +98,6 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool initSkeletonStream( bool seated );
 	bool start();
 
-	// face tracking
-	bool startFaceTracking();
-
 	// audio functionality
 	bool startAudioStream();
 	bool initSpeech();
@@ -117,6 +114,9 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool isFrameNewVideo();
 	bool isFrameNewDepth();
 	bool isNewSkeleton();
+	bool isFaceNew() {
+		return bIsFaceNew;
+	}
 
 	void setDepthClipping(float nearClip=500, float farClip=4000);
 	
@@ -130,6 +130,8 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	/// enable/disable frame loading into textures on update()
 	void setUseTexture(bool bUse);
+	// you can just not use any streams if you want
+	void setUseStreams(bool bUse);
 
 	/// draw the video texture
 	void draw(float x, float y, float w, float h);
@@ -162,7 +164,6 @@ class ofxKinectCommonBridge : protected ofThread {
 		return depthTex;
 	}
 
-
 	ofTexture &getColorTexture() {
 		return videoTex;
 	}
@@ -172,6 +173,8 @@ class ofxKinectCommonBridge : protected ofThread {
 	{
 		return faceTrackingTexture;
 	}
+
+	ofxKCBFace& getFaceData();
 
 	void setSpeechGrammarFile(string path) {
 		grammarFile = path;
@@ -228,6 +231,8 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bIsSkeletonFrameNew;
 	bool bUpdateSpeech;
 	bool bUpdateFaces;
+	bool bIsFaceNew;
+	bool bUseStreams;
 
 	bool bProgrammableRenderer;
 
