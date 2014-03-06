@@ -56,6 +56,8 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool initIRStream( int width, int height );
 	bool initSkeletonStream( bool seated );
 	bool start();
+	KCBHANDLE getHandle();
+	INuiSensor & getNuiSensor();
 
 	void stop();
 
