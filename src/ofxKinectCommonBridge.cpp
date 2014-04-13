@@ -790,65 +790,48 @@ bool ofxKinectCommonBridge::loadGrammar( string filename )
 	return true; // make this non stupid
 }
 
-void ofxKinectCommonBridge::updateFaceTrackingData()
+void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 {
 
-	HRESULT hr;
+	FT_VECTOR2D* points2D;
+	UINT pointCount;
+	ftResult->Get2DShapePoints( &points2D, &pointCount );
 
-	IFTImage* ftImage; // don't allocate?
-	HRESULT res = GetFaceTrackingImage(hKinect, &ftImage);
-
-	faceDataBack.position.set(GetXCenterFace(hKinect), GetYCenterFace(hKinect));
-
-	IFTFaceTracker* faceTracker;
-	res = GetFaceTracker(hKinect, &faceTracker);
-
-	IFTModel *model;
-	faceTracker->GetFaceModel(&model);
-
-	IFTResult *result;
-	KinectGetFaceTrackingResult(hKinect, &result);
-
-	// make some points we can use
-	FT_VECTOR2D* pPts2D = new FT_VECTOR2D[model->GetVertexCount()];
+	RECT *pRect;
+	ftResult->GetFaceRect( pRect );
+	if(pRect) {
+		faceDataBack.rect.set( ofVec2f(pRect->left, pRect->top), ofVec2f(pRect->right, pRect->bottom ));
+	}
 
 	FLOAT *AUCoefficients;
     UINT AUCount;
-    hr = result->GetAUCoefficients(&AUCoefficients, &AUCount);
-
+    ftResult->GetAUCoefficients(&AUCoefficients, &AUCount);
 
     FLOAT scale, rotationXYZ[3], translationXYZ[3];
-    hr = result->Get3DPose(&scale, rotationXYZ, translationXYZ);
+    ftResult->Get3DPose(&scale, rotationXYZ, translationXYZ);
 
-	POINT viewOffset;
-	viewOffset.x = 0.f;
-	viewOffset.y = 0.f;
+	faceDataBack.rotation.set(rotationXYZ[0], rotationXYZ[1], rotationXYZ[2]);
+	faceDataBack.translation.set(translationXYZ[0], translationXYZ[1], translationXYZ[2]);
 
-	hr = model->GetProjectedShape(&videoCameraConfig, zoomFactor, viewOffset, &pSUCoef, model->GetSUCount(), AUCoefficients, AUCount, scale, rotationXYZ, translationXYZ, pPts2D, model->GetVertexCount());
-
-	POINT* p3DMdl = new POINT[model->GetVertexCount()];
-
-    for (UINT i = 0; i<model->GetVertexCount(); ++i)
-    {
-        p3DMdl[i].x = LONG(pPts2D[i].x + 0.5f);
-        p3DMdl[i].y = LONG(pPts2D[i].y + 0.5f);
-    }
-
-	for( UINT i = 0; i<model->GetVertexCount(); i++) 
+	for( UINT i = 0; i<pointCount; i++) 
 	{
-		ofVec3f v(p3DMdl[i].x, p3DMdl[i].y, 0);
+		// these are in pixel coords
+		float xScale, yScale;
+
+		if(colorRes == NUI_IMAGE_RESOLUTION_640x480) {
+			xScale = 640;
+			yScale = 480;
+		} else if(colorRes == NUI_IMAGE_RESOLUTION_1280x960) {
+			xScale = 1280;
+			yScale = 960;
+		} else {
+			xScale = 320;
+			yScale = 240;
+		}
+
+
+		ofVec3f v( (points2D[i].x + 0.5f) * xScale, (points2D[i].y + 0.5f) * yScale, 0);
 		faceDataBack.mesh.getVertices().push_back(v);
-	}
-
-	// make nice triangles
-	FT_TRIANGLE *triangles;
-	UINT triangleCount;
-	model->GetTriangles(&triangles, &triangleCount);
-
-	for ( UINT i = 0; i < triangleCount; i++ )
-	{
-		faceDataBack.mesh.addTriangle( triangles[i].i, triangles[i].j, triangles[i].k );
-		i++;
 	}
 }
 
@@ -1024,7 +1007,9 @@ void ofxKinectCommonBridge::threadedFunction(){
 		if(bIsTrackingFace)
 		{
 			IFTResult *ftResult;
-			if(KinectIsDepthFrameReady( hKinect ) && KinectIsColorFrameReady(hKinect) ) 
+
+
+			/*if(KinectIsDepthFrameReady( hKinect ) && KinectIsColorFrameReady(hKinect) ) 
 			{
 				HRESULT hr = KinectGetFaceTrackingResult( hKinect, &ftResult );
 
@@ -1034,7 +1019,16 @@ void ofxKinectCommonBridge::threadedFunction(){
 					bUpdateFaces = true;
 
 				}
-			}
+			}*/
+			if(KinectIsFaceTrackingResultReady(hKinect))
+            {
+                IFTResult* pResult;
+                if (SUCCEEDED(KinectGetFaceTrackingResult(hKinect, &pResult)) && SUCCEEDED(pResult->GetStatus()))
+                {
+					updateFaceTrackingData(pResult);
+					bUpdateFaces = true;
+                }
+            }
 		}
 
 		//TODO: TILT

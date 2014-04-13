@@ -16,9 +16,6 @@ See the Apache 2 License for the specific language governing permissions and lim
 
 #define WIN32_LEAN_AND_MEAN     // Exclude rarely-used stuff from Windows headers
 
-#define KCB_ENABLE_SPEECH
-#define KCB_ENABLE_FT
-
 #ifdef KCB_ENABLE_SPEECH
 #include <sapi.h>
 #include <sphelper.h>
@@ -328,12 +325,19 @@ extern "C"
 #endif
 
 #ifdef KCB_ENABLE_FT
-    KINECT_CB void APIENTRY KinectEnableFaceTracking(KCBHANDLE kcbHandle);
+    KINECT_CB HRESULT APIENTRY KinectEnableFaceTracking(KCBHANDLE kcbHandle, bool bNearMode = false);
+    KINECT_CB void APIENTRY KinectDisableFaceTracking(KCBHANDLE kcbHandle);
+
+    KINECT_CB bool APIENTRY KinectGetColorStreamCameraConfig(KCBHANDLE kcbHandle, _Out_ FT_CAMERA_CONFIG& config);
+    KINECT_CB bool APIENTRY KinectGetDepthStreamCameraConfig(KCBHANDLE kcbHandle, _Out_ FT_CAMERA_CONFIG& config);
+ 
+    KINECT_CB bool APIENTRY KinectIsFaceTrackingResultReady( KCBHANDLE kcbHandle );
+
 	KINECT_CB HRESULT APIENTRY KinectGetFaceTrackingResult( KCBHANDLE kcbHandle, _Out_ IFTResult** ppResult );
-	KINECT_CB HRESULT GetFaceTrackingImage(KCBHANDLE kcbHandle, IFTImage** pImage);
-	KINECT_CB float GetXCenterFace(KCBHANDLE kcbHandle);
-	KINECT_CB float GetYCenterFace(KCBHANDLE kcbHandle);
-	KINECT_CB HRESULT GetFaceTracker(KCBHANDLE kcbHandle, IFTFaceTracker** pFaceTracker);
+	KINECT_CB HRESULT KinectGetFaceTrackingImage(KCBHANDLE kcbHandle, IFTImage** pImage);
+	KINECT_CB float KinectGetXCenterFace(KCBHANDLE kcbHandle);
+	KINECT_CB float KinectGetYCenterFace(KCBHANDLE kcbHandle);
+	KINECT_CB HRESULT KinectGetFaceTracker(KCBHANDLE kcbHandle, IFTFaceTracker** pFaceTracker);
 #endif
 
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#define KCB_ENABLE_FT
+#define KCB_ENABLE_SPEECH
+
 #include "KinectCommonBridgeLib.h"
 #include "NuiSensor.h"
 #include "ofMain.h" // this MUST come after KCB!!! Not sure you need NuiSensor.h if using KCB
@@ -19,7 +22,8 @@ public:
 		LEFT_EYE, RIGHT_EYE, MOUTH, NOSE, CHIN, LEFT_EAR, RIGHT_EAR
 	};
 
-	ofVec2f position;
+	ofVec3f rotation, translation;
+	ofRectangle rect;
 	ofMesh mesh;
 	
 	ofVec3f getLocationByIdentifier(FACE_POSITIONS position);
@@ -200,7 +204,7 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bNearWhite;
 	float nearClipping, farClipping;
 
-	void updateFaceTrackingData();
+	void updateFaceTrackingData( IFTResult* ftResult );
 
   	bool bUseTexture;
 	ofTexture depthTex; ///< the depth texture
