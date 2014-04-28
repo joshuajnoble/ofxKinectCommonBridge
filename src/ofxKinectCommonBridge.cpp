@@ -829,7 +829,6 @@ void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 			yScale = 240;
 		}
 
-
 		ofVec3f v( (points2D[i].x + 0.5f) * xScale, (points2D[i].y + 0.5f) * yScale, 0);
 		faceDataBack.mesh.getVertices().push_back(v);
 	}
