@@ -351,7 +351,7 @@ void ofxKinectCommonBridge::update()
 	{
 		//swap<ofxKCBFace>( faceData, faceDataBack ); // copy it in, need lock?
 		faceData = faceDataBack;
-		bIsFaceNew = false;
+		bIsFaceNew = true;
 	}
 }
 
@@ -704,24 +704,26 @@ bool ofxKinectCommonBridge::initIRStream( int width, int height )
 
 bool ofxKinectCommonBridge::initFaceTracking() {
 
+	// initialize camera params
+	hKinect = KinectOpenDefaultSensor();
 
-	// initialize camera parmas
-	//videoCameraConfig.Height = 480;
-	//videoCameraConfig.Width = 640;
-	//videoCameraConfig.FocalLength = NUI_CAMERA_COLOR_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+	if( KCB_INVALID_HANDLE == hKinect )
+    {
+		ofLogError() << "initFaceTracking: KinectOpenDefaultSensor() " << endl;
+        // this rarely happens and may be a memory issue typically
+        return false;
+    }
 
-	//depthCameraConfig.Height = 480;
-	//depthCameraConfig.Width = 480;
-	//depthCameraConfig.FocalLength = NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+	// enable face tracking
+    HRESULT hr = KinectEnableFaceTracking(hKinect, true);
+    if(FAILED(hr)) {
+		ofLogError() << "KinectEnableFaceTracking: unable to enable face tracking" << endl;
+	} else {
+		bIsTrackingFace = true;
+	}
 
-	initColorStream(640, 480);
-	initDepthStream(320, 240, true);
-
-	KinectEnableFaceTracking(hKinect);
-
-	bIsTrackingFace = true;
-
-	return true;
+	bUseStreams = false;
+    return SUCCEEDED(hr);
 }
 
 bool ofxKinectCommonBridge::initSkeletonStream( bool seated )
@@ -765,18 +767,22 @@ bool ofxKinectCommonBridge::start()
 		initSensor();
 	}
 
+	HRESULT hr;
+
 	if(!bInited && bUseStreams){
 		cout << " init default streams " << endl;
 
 		initColorStream(640,480);
 		initDepthStream(320,240);
+		hr = KinectStartStreams(hKinect);
+
+		if( FAILED(hr) )
+		{
+			return false;
+		}
+
 	}
 
-    HRESULT hr = KinectStartStreams(hKinect);
-    if( FAILED(hr) )
-    {
-        return false;
-    }
 	startThread(true, false);
 	bStarted = true;	
 	return true;
@@ -797,11 +803,10 @@ void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 	UINT pointCount;
 	ftResult->Get2DShapePoints( &points2D, &pointCount );
 
-	RECT *pRect;
-	ftResult->GetFaceRect( pRect );
-	if(pRect) {
-		faceDataBack.rect.set( ofVec2f(pRect->left, pRect->top), ofVec2f(pRect->right, pRect->bottom ));
-	}
+	RECT pRect;
+	ftResult->GetFaceRect( &pRect );
+	
+	faceDataBack.rect.set( ofVec2f(pRect.left, pRect.top), ofVec2f(pRect.right, pRect.bottom ));
 
 	FLOAT *AUCoefficients;
     UINT AUCount;
@@ -829,9 +834,14 @@ void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 			yScale = 240;
 		}
 
-		ofVec3f v( (points2D[i].x + 0.5f) * xScale, (points2D[i].y + 0.5f) * yScale, 0);
+		//ofVec3f v( (points2D[i].x + 0.5f) * xScale, (points2D[i].y + 0.5f) * yScale, 0);
+		ofVec3f v( points2D[i].x, points2D[i].y, 0);
 		faceDataBack.mesh.getVertices().push_back(v);
 	}
+
+	// clean up
+	//free( AUCoefficients );
+	//free( points2D );
 }
 
 bool ofxKinectCommonBridge::initAudio()
@@ -845,6 +855,7 @@ bool ofxKinectCommonBridge::initAudio()
 	return false;
 }
 
+#ifdef KCB_ENABLE_SPEECH
 bool ofxKinectCommonBridge::initSpeech()
 {
 
@@ -875,6 +886,7 @@ bool ofxKinectCommonBridge::initSpeech()
 	bInited = true;
 	return true;
 }
+#endif
 
 //bool ofxKinectCommonBridge::startAudioStream()
 //{
@@ -886,6 +898,8 @@ void ofxKinectCommonBridge::stop() {
 	if(bStarted){
 		waitForThread(true);
 		bStarted = false;
+
+		KinectCloseSensor(hKinect); // release the handle
 
 		// release these interfaces when done
 		if (mapper)
@@ -914,7 +928,7 @@ void ofxKinectCommonBridge::threadedFunction(){
 	//how can we tell?
 	while(isThreadRunning()) {
 
-        if( KinectIsDepthFrameReady(hKinect) && SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
+        /*if( KinectIsDepthFrameReady(hKinect) && SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
 		{
 			bNeedsUpdateDepth = true;
         }
@@ -1001,28 +1015,17 @@ void ofxKinectCommonBridge::threadedFunction(){
 		if(bUsingAudio)
 		{
 			
-		}
+		}*/
 
 		if(bIsTrackingFace)
 		{
 			IFTResult *ftResult;
 
-
-			/*if(KinectIsDepthFrameReady( hKinect ) && KinectIsColorFrameReady(hKinect) ) 
-			{
-				HRESULT hr = KinectGetFaceTrackingResult( hKinect, &ftResult );
-
-				if(hr == S_OK) {
-
-					updateFaceTrackingData();
-					bUpdateFaces = true;
-
-				}
-			}*/
 			if(KinectIsFaceTrackingResultReady(hKinect))
             {
                 IFTResult* pResult;
-                if (SUCCEEDED(KinectGetFaceTrackingResult(hKinect, &pResult)) && SUCCEEDED(pResult->GetStatus()))
+
+				if (SUCCEEDED(KinectGetFaceTrackingResult(hKinect, &pResult)) && SUCCEEDED(pResult->GetStatus()))
                 {
 					updateFaceTrackingData(pResult);
 					bUpdateFaces = true;

@@ -14,6 +14,7 @@ See the Apache 2 License for the specific language governing permissions and lim
 
 #pragma once
 
+#define KCB_ENABLE_FT
 #define WIN32_LEAN_AND_MEAN     // Exclude rarely-used stuff from Windows headers
 
 #ifdef KCB_ENABLE_SPEECH

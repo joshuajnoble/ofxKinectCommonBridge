@@ -1,14 +1,14 @@
 #pragma once
 
-#define KCB_ENABLE_FT
-#define KCB_ENABLE_SPEECH
+//#define KCB_ENABLE_FT
+//#define KCB_ENABLE_SPEECH
 
 #include "KinectCommonBridgeLib.h"
 #include "NuiSensor.h"
 #include "ofMain.h" // this MUST come after KCB!!! Not sure you need NuiSensor.h if using KCB
 
 #pragma comment (lib, "KinectCommonBridge.lib") // add path to lib additional dependency dir $(TargetDir)
-
+#pragma comment(lib, "FaceTrackLib.lib")
 
 class ofxKCBFace  {
 
@@ -20,6 +20,15 @@ public:
 
 	enum FEATURE {
 		LEFT_EYE, RIGHT_EYE, MOUTH, NOSE, CHIN, LEFT_EAR, RIGHT_EAR
+	};
+
+	ofxKCBFace & operator=(const ofxKCBFace & rhs) {
+		rotation = rhs.rotation;
+		translation = rhs.translation;
+		//mesh = rhs.mesh; // this is causing problems
+		rect = rhs.rect;
+
+		return *this;
 	};
 
 	ofVec3f rotation, translation;
