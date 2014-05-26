@@ -104,7 +104,7 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	// new API
 	bool initSensor( int id = 0 );
-	bool initDepthStream( int width, int height, bool nearMode = false, bool mapDepthToColor = false );
+	bool initDepthStream( int width, int height, bool nearMode = false, bool mapColorToDepth = false );
 	bool initColorStream( int width, int height, bool mapColorToDepth = false );
 	bool initFaceTracking(); // no params, can't use with other stuff either.
 	bool initIRStream( int width, int height );
@@ -280,7 +280,7 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	bool mappingColorToDepth;
 	bool mappingDepthToColor;
-	bool beginMappingColorToDepth;
+	bool beginMappingColorToDepth, beginMappingDepthToColor;
 
 	NUI_IMAGE_RESOLUTION colorRes;
 	NUI_IMAGE_RESOLUTION depthRes;

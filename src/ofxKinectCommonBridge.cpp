@@ -177,10 +177,38 @@ void ofxKinectCommonBridge::update()
 		swap(videoPixels,videoPixelsBack);
 
 		// if you're mapping color pix to depth space, downscale color pix
-		/*if(mappingColorToDepth && beginMappingColorToDepth)
+		if(mappingColorToDepth && beginMappingColorToDepth)
 		{
 
-			NUI_DEPTH_IMAGE_POINT  *pts = new NUI_DEPTH_IMAGE_POINT[colorFormat.dwHeight*colorFormat.dwWidth];
+			NUI_DEPTH_IMAGE_POINT  *depthPts = new NUI_DEPTH_IMAGE_POINT[colorFormat.dwHeight*colorFormat.dwWidth];
+			NUI_DEPTH_IMAGE_PIXEL  *depthPix = new NUI_DEPTH_IMAGE_PIXEL[depthFormat.dwHeight*depthFormat.dwWidth];
+
+			int i = 0; 
+			while ( i < (depthFormat.dwWidth*depthFormat.dwHeight)) {
+				depthPix[i].depth = (USHORT) depthPixelsRaw.getPixels()[i];
+				depthPix[i].playerIndex = 0;
+				i++;
+			}
+
+			HRESULT mapResult;
+			mapResult = KinectMapColorFrameToDepthFrame(hKinect, NUI_IMAGE_TYPE_COLOR, colorRes, depthRes,
+						640 * 480, depthPix, colorFormat.dwHeight*colorFormat.dwWidth, depthPts);
+
+			for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ )
+			{
+				videoPixels[i] = videoPixels[depthPts[i].y * depthFormat.dwWidth + depthPts[i].x];
+			}
+
+			delete[] depthPts;
+			delete[] depthPix;
+
+		}
+
+		// if you're mapping color pix to depth space, downscale color pix
+		if(mappingDepthToColor && beginMappingDepthToColor)
+		{
+
+			NUI_COLOR_IMAGE_POINT  *pts = new NUI_COLOR_IMAGE_POINT[colorFormat.dwHeight*colorFormat.dwWidth];
 			NUI_DEPTH_IMAGE_PIXEL  *depth = new NUI_DEPTH_IMAGE_PIXEL[depthFormat.dwHeight*depthFormat.dwWidth];
 
 			int i = 0; 
@@ -191,9 +219,8 @@ void ofxKinectCommonBridge::update()
 			}
 
 			HRESULT mapResult;
-			mapResult = mapper->MapColorFrameToDepthFrame(NUI_IMAGE_TYPE_COLOR, NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_640x480,
-						640 * 480, depth,
-						640 * 480, pts);
+			mapResult = KinectMapDepthFrameToColorFrame(hKinect, colorRes, depthFormat.dwHeight*depthFormat.dwWidth, depth, NUI_IMAGE_TYPE_COLOR, depthRes,
+						colorFormat.dwHeight*colorFormat.dwWidth, pts);
 
 			for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ )
 			{
@@ -203,7 +230,7 @@ void ofxKinectCommonBridge::update()
 			delete[] pts;
 			delete[] depth;
 
-		}*/
+		}
 
 		bNeedsUpdateVideo = false;
 
