@@ -702,10 +702,15 @@ bool ofxKinectCommonBridge::initIRStream( int width, int height )
 	return true;
 }
 
+#ifdef KCB_ENABLE_FT
 bool ofxKinectCommonBridge::initFaceTracking() {
 
-	// initialize camera params
-	hKinect = KinectOpenDefaultSensor();
+	// initialize camera params if we don't already
+	// have a Kinect
+	if( hKinect == 0) 
+	{
+		hKinect = KinectOpenDefaultSensor();
+	}
 
 	if( KCB_INVALID_HANDLE == hKinect )
     {
@@ -725,6 +730,7 @@ bool ofxKinectCommonBridge::initFaceTracking() {
 	bUseStreams = false;
     return SUCCEEDED(hr);
 }
+#endif
 
 bool ofxKinectCommonBridge::initSkeletonStream( bool seated )
 {
@@ -820,26 +826,11 @@ void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 
 	for( UINT i = 0; i<pointCount; i++) 
 	{
-		// these are in pixel coords
-		float xScale, yScale;
-
-		if(colorRes == NUI_IMAGE_RESOLUTION_640x480) {
-			xScale = 640;
-			yScale = 480;
-		} else if(colorRes == NUI_IMAGE_RESOLUTION_1280x960) {
-			xScale = 1280;
-			yScale = 960;
-		} else {
-			xScale = 320;
-			yScale = 240;
-		}
-
-		//ofVec3f v( (points2D[i].x + 0.5f) * xScale, (points2D[i].y + 0.5f) * yScale, 0);
 		ofVec3f v( points2D[i].x, points2D[i].y, 0);
 		faceDataBack.mesh.getVertices().push_back(v);
 	}
 
-	// clean up
+	// clean up?
 	//free( AUCoefficients );
 	//free( points2D );
 }
@@ -922,13 +913,13 @@ void ofxKinectCommonBridge::threadedFunction(){
 
 	LONGLONG timestamp;
 	
-	cout << "STARTING THREAD" << endl;
+	ofLogNotice( "ofxKCB",  "starting device data thread ");
 
 	//JG: DO WE NEED TO BAIL ON THIS LOOP IF THE DEVICE QUITS? 
 	//how can we tell?
 	while(isThreadRunning()) {
 
-        /*if( KinectIsDepthFrameReady(hKinect) && SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
+        if( KinectIsDepthFrameReady(hKinect) && SUCCEEDED( KinectGetDepthFrame(hKinect, depthFormat.cbBufferSize, (BYTE*)depthPixelsRawBack.getPixels(), &timestamp) ) )
 		{
 			bNeedsUpdateDepth = true;
         }
@@ -960,6 +951,7 @@ void ofxKinectCommonBridge::threadedFunction(){
 			}
 		}
 
+#ifdef KCB_ENABLE_SPEECH
 		if(bUsingSpeech)
 		{
 			if(KinectIsSpeechEventReady(hKinect))
@@ -1011,10 +1003,9 @@ void ofxKinectCommonBridge::threadedFunction(){
 				}
 			}
 		}
+#endif
 
-		if(bUsingAudio)
-		{
-			
+		/*if(bUsingAudio) {	 // not doing audio quite yet
 		}*/
 
 		if(bIsTrackingFace)
@@ -1033,10 +1024,6 @@ void ofxKinectCommonBridge::threadedFunction(){
             }
 		}
 
-		//TODO: TILT
-		//TODO: ACCEL
-		//TODO: FACE
-		//TODO: AUDIO
 		ofSleepMillis(10);
 	}
 }
