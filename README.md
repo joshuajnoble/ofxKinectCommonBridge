@@ -123,3 +123,109 @@ If you have used the Project Generator to create your project, you can use this 
 - Open the *Property Manager* for your *Solution* (**View > Other Windows > Property Manager**)
   - Right click on your project (e.g. `emptyExample`) and select **Add Existing Property Sheet...**
   - Select the file `addons\ofxKinectCommonBridge\ofxKinectCommonBridge.props`
+
+
+================================================================================================================================================================
+ Face Tracking and Speech
+================================================================================================================================================================
+
+Hi there!
+
+Right now the Face Tracking and Speech detection require that you have the Professional versions of Visual Studio. If you'd like to enable them, go to [ofxKinectCommonBridge.h](https://github.com/joshuajnoble/ofxKinectCommonBridge/blob/master/src/ofxKinectCommonBridge.h) and uncomment one or both of these:
+
+```cpp
+//#define KCB_ENABLE_FT
+//#define KCB_ENABLE_SPEECH
+```
+
+FaceTracking is pretty straight forward:
+
+```cpp
+kinect.initFaceTracking()
+```
+
+then in the update() method, call getFaceData()
+
+```cpp
+kinect.update();
+if(kinect.isFaceNew()) {
+	face = kinect.getFaceData();
+}
+```
+
+The face is a bit rough still so caveat emptor, but it works ok and tracks 2 face simultaneously.
+
+Speech is a little more complex. You need a few things:
+
+```cpp
+#define KCB_ENABLE_SPEECH // uncomment this
+```
+
+Then in your setup:
+
+```cpp
+void testApp::setup()
+{
+
+	string grammarPath = ofToDataPath("grammar\\SpeechBasics-D2D.grxml", true); // you need a grammar file, more on that later
+	kinect.setSpeechGrammarFile(grammarPath);
+	kinect.initSpeech();
+	kinect.start();
+	
+	ofAddListener(ofxKCBSpeechEvent::event, this, &testApp::speechEvent);
+}
+```
+
+Then a listener:
+
+```cpp
+void testApp::speechEvent( ofxKCBSpeechEvent & speechEvt )
+{
+	cout << " got speech event " << endl;
+	cout << " detected " << speechEvt.detectedSpeech << endl;
+	cout << " confidence " << speechEvt.confidence << endl;
+}
+```
+
+So, you're probably wondering: what's the detected speech? It's going to be a tag. What's a tag? It's a tag defined in your Grammar file. What's a grammar file? A grammar file defines what yoa  is listening for. Here's something pretty simple:
+
+```cpp
+<grammar version="1.0" xml:lang="en-US" root="rootRule" tag-format="semantics/1.0-literals" xmlns="http://www.w3.org/2001/06/grammar">
+  <rule id="rootRule">
+    <one-of>
+      <item>
+	<!-- can be flexible -->
+        <tag>FORWARD</tag>
+        <one-of>
+          <item> forwards </item>
+          <item> forward </item>
+          <item> straight </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>BACKWARD</tag>
+	<!-- can be flexible -->
+        <one-of>
+          <item> backward </item>
+          <item> backwards </item>
+          <item> back </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>LEFT</tag>
+        <one-of>
+          <item> turn left </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>RIGHT</tag>
+        <one-of>
+          <item> turn right </item>
+        </one-of>
+      </item>
+    </one-of>
+  </rule>
+</grammar>
+```
+
+You can build much more complex ones. 
