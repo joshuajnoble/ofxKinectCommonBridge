@@ -216,7 +216,9 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bNearWhite;
 	float nearClipping, farClipping;
 
+#ifdef KCB_ENABLE_FT
 	void updateFaceTrackingData( IFTResult* ftResult );
+#endif
 
   	bool bUseTexture;
 	ofTexture depthTex; ///< the depth texture
@@ -264,6 +266,9 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	// face
 	bool bIsTrackingFace;
+
+#ifdef KCB_ENABLE_FT
+
 	// double buffer for faces
 	ofxKCBFace faceDataBack, faceData; // only single face at the moment
 	// camera params for face tracking
@@ -272,6 +277,7 @@ class ofxKinectCommonBridge : protected ofThread {
     FLOAT pSUCoef;
     FLOAT zoomFactor;
 
+#endif
 
 	bool bVideoIsInfrared;
 	bool bUsingSkeletons;

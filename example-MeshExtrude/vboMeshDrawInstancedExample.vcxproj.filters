@@ -8,7 +8,7 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ofxKinectCommonBridge.cpp">
-      <Filter>addons\ofxKinect4Windows</Filter>
+      <Filter>addons\ofxKinectCommonBridge</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ofxGui\src\ofxBaseGui.cpp">
       <Filter>ofxGui</Filter>
@@ -42,11 +42,11 @@
     <Filter Include="addons">
       <UniqueIdentifier>{f5596e99-79d8-4f67-be27-62329b5608b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="addons\ofxKinect4Windows">
-      <UniqueIdentifier>{94ab4a79-08c3-4bdd-ae38-1631ca24891d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ofxGui">
       <UniqueIdentifier>{d66a3277-1fd9-4727-a554-cde23a4e8cdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxKinectCommonBridge">
+      <UniqueIdentifier>{94ab4a79-08c3-4bdd-ae38-1631ca24891d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -54,10 +54,10 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\libs\KinectCommonBridge\include\KinectCommonBridgeLib.h">
-      <Filter>addons\ofxKinect4Windows</Filter>
+      <Filter>addons\ofxKinectCommonBridge</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ofxKinectCommonBridge.h">
-      <Filter>addons\ofxKinect4Windows</Filter>
+      <Filter>addons\ofxKinectCommonBridge</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ofxGui\src\ofxBaseGui.h">
       <Filter>ofxGui</Filter>

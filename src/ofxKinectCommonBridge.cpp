@@ -151,10 +151,11 @@ bool ofxKinectCommonBridge::isNewSkeleton() {
 	return bNeedsUpdateSkeleton;
 }
 
+#ifdef KCB_ENABLE_FT
 ofxKCBFace& ofxKinectCommonBridge::getFaceData() {
 	return faceData;
 }
-
+#endif
 
 vector<Skeleton> &ofxKinectCommonBridge::getSkeletons() {
 	return skeletons;
@@ -362,7 +363,7 @@ void ofxKinectCommonBridge::update()
 	} else {
 		bNeedsUpdateSkeleton = false;
 	}
-
+#ifdef KCB_ENABLE_SPEECH
 	if(bUpdateSpeech)
 	{
 		ofxKCBSpeechEvent spEvent;
@@ -373,13 +374,16 @@ void ofxKinectCommonBridge::update()
 
 		bUpdateSpeech = false;
 	}
+#endif
 
+#ifdef KCB_ENABLE_FT
 	if(bUpdateFaces)
 	{
 		//swap<ofxKCBFace>( faceData, faceDataBack ); // copy it in, need lock?
 		faceData = faceDataBack;
 		bIsFaceNew = true;
 	}
+#endif
 }
 
 //------------------------------------
@@ -829,6 +833,8 @@ bool ofxKinectCommonBridge::loadGrammar( string filename )
 	return true; // make this non stupid
 }
 
+#ifdef KCB_ENABLE_FT
+
 void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 {
 
@@ -861,6 +867,8 @@ void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 	//free( AUCoefficients );
 	//free( points2D );
 }
+
+#endif
 
 bool ofxKinectCommonBridge::initAudio()
 {
@@ -1034,6 +1042,7 @@ void ofxKinectCommonBridge::threadedFunction(){
 
 		/*if(bUsingAudio) {	 // not doing audio quite yet
 		}*/
+#ifdef KCB_ENABLE_FT
 
 		if(bIsTrackingFace)
 		{
@@ -1050,7 +1059,9 @@ void ofxKinectCommonBridge::threadedFunction(){
                 }
             }
 		}
+#endif
 
 		ofSleepMillis(10);
 	}
+
 }
