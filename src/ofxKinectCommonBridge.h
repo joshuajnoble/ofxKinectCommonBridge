@@ -236,8 +236,6 @@ class ofxKinectCommonBridge : protected ofThread {
 	ofShortPixels depthPixelsRaw;
 	ofShortPixels depthPixelsRawBack;	///< depth back
 
-	ofShortPixels irPixelsRaw;
-	ofShortPixels irPixelsBackRaw;
 	ofPixels irPixels;
 	ofPixels irPixelsBack;
 
