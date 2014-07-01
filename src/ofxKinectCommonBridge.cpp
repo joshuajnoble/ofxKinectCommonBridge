@@ -552,13 +552,7 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 
 	if (mappingDepthToColor)
 	{
-		// get the port ID from the simple api
-		const WCHAR* wcPortID = KinectGetPortID(hKinect);
-
-		// create an instance of the same sensor
-		INuiSensor* nuiSensor = nullptr;
-		HRESULT hr = NuiCreateSensorById(wcPortID, &nuiSensor);
-		nuiSensor->NuiGetCoordinateMapper(&mapper);
+		this->getNuiSensor().NuiGetCoordinateMapper(&mapper);
 	}
 
 	if(bStarted){
@@ -918,6 +912,22 @@ bool ofxKinectCommonBridge::initSpeech()
 //{
 //
 //}
+
+//----------------------------------------------------------
+KCBHANDLE ofxKinectCommonBridge::getHandle() {
+	return this->hKinect;
+}
+
+//----------------------------------------------------------
+INuiSensor & ofxKinectCommonBridge::getNuiSensor() {
+	// get the port ID from the simple api
+	const WCHAR* wcPortID = KinectGetPortID(hKinect);
+
+	// create an instance of the same sensor
+	INuiSensor* nuiSensor = nullptr;
+	HRESULT hr = NuiCreateSensorById(wcPortID, &nuiSensor);
+	return * nuiSensor;
+}
 
 //----------------------------------------------------------
 void ofxKinectCommonBridge::stop() {
