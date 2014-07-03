@@ -736,6 +736,9 @@ void ofxKinectCommonBridge::stop() {
 			nuiSensor->Release();
 			nuiSensor = nullptr;
 		}
+		
+		KinectStopStreams( hKinect );
+		KinectCloseSensor( hKinect );
 
 	}
 }	
