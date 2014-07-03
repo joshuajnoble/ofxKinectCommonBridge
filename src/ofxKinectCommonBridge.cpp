@@ -1800,6 +1800,7 @@ INuiSensor & ofxKinectCommonBridge::getNuiSensor() {
 //----------------------------------------------------------
 void ofxKinectCommonBridge::stop() {
 	if(bStarted){
+
 		waitForThread(true);
 		bStarted = false;
 
