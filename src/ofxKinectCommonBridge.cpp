@@ -70,6 +70,8 @@ const ofVec3f SkeletonBone::getScreenPosition() {
 
 ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	hKinect = NULL;
+	mapper = NULL;
+	nuiSensor = NULL;
 
 	beginMappingColorToDepth = false;
 
@@ -87,6 +89,7 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bUsingSkeletons = false;
   	bUseTexture = true;
 	bProgrammableRenderer = false;
+	bNearWhite = false;
 	
 	setDepthClipping();
 }
