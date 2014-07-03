@@ -1,22 +1,5 @@
 #include "ofxKinectCommonBridge.h"
 
-// speech event declaration
-ofEvent<ofxKCBSpeechEvent> ofxKCBSpeechEvent::event;
-
-ofVec3f ofxKCBFace::getLocationByIdentifier(FACE_POSITIONS position)
-{
-	return mesh.getVertex( (int) position );
-}
-
-ofRectangle ofxKCBFace::getFeatureBounding(FACE_POSITIONS position)
-{
-	//return mesh.getVertex( (int) position );
-	// find the bounding box for all the features and return;
-
-	ofRectangle bounds;
-	return bounds;
-}
-
 SkeletonBone::SkeletonBone ( const Vector4& inPosition, const _NUI_SKELETON_BONE_ORIENTATION& orient, const NUI_SKELETON_POSITION_TRACKING_STATE& trackingState) {
 
 	cameraRotation.set( orient.absoluteRotation.rotationMatrix.M11, orient.absoluteRotation.rotationMatrix.M12, orient.absoluteRotation.rotationMatrix.M13, orient.absoluteRotation.rotationMatrix.M14,
@@ -87,6 +70,9 @@ const ofVec3f SkeletonBone::getScreenPosition() {
 
 ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	hKinect = NULL;
+	mapper = NULL;
+	nuiSensor = NULL;
+
 
 	beginMappingColorToDepth = false;
 
@@ -97,9 +83,6 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bVideoIsInfrared = false;
 	bInited = false;
 	bStarted = false;
-	bIsTrackingFace = false;
-	bUsingSpeech = false;
-	bUseStreams = true;
 
 	mappingColorToDepth = false;
 	mappingDepthToColor = false;
@@ -107,8 +90,7 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bUsingSkeletons = false;
   	bUseTexture = true;
 	bProgrammableRenderer = false;
-
-	bIsFaceNew = false;
+	bNearWhite = false;
 	
 	setDepthClipping();
 }
@@ -151,12 +133,6 @@ bool ofxKinectCommonBridge::isNewSkeleton() {
 	return bNeedsUpdateSkeleton;
 }
 
-#ifdef KCB_ENABLE_FT
-ofxKCBFace& ofxKinectCommonBridge::getFaceData() {
-	return faceData;
-}
-#endif
-
 vector<Skeleton> &ofxKinectCommonBridge::getSkeletons() {
 	return skeletons;
 }
@@ -178,38 +154,10 @@ void ofxKinectCommonBridge::update()
 		swap(videoPixels,videoPixelsBack);
 
 		// if you're mapping color pix to depth space, downscale color pix
-		if(mappingColorToDepth && beginMappingColorToDepth)
+		/*if(mappingColorToDepth && beginMappingColorToDepth)
 		{
 
-			NUI_DEPTH_IMAGE_POINT  *depthPts = new NUI_DEPTH_IMAGE_POINT[colorFormat.dwHeight*colorFormat.dwWidth];
-			NUI_DEPTH_IMAGE_PIXEL  *depthPix = new NUI_DEPTH_IMAGE_PIXEL[depthFormat.dwHeight*depthFormat.dwWidth];
-
-			int i = 0; 
-			while ( i < (depthFormat.dwWidth*depthFormat.dwHeight)) {
-				depthPix[i].depth = (USHORT) depthPixelsRaw.getPixels()[i];
-				depthPix[i].playerIndex = 0;
-				i++;
-			}
-
-			HRESULT mapResult;
-			mapResult = KinectMapColorFrameToDepthFrame(hKinect, NUI_IMAGE_TYPE_COLOR, colorRes, depthRes,
-						640 * 480, depthPix, colorFormat.dwHeight*colorFormat.dwWidth, depthPts);
-
-			for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ )
-			{
-				videoPixels[i] = videoPixels[depthPts[i].y * depthFormat.dwWidth + depthPts[i].x];
-			}
-
-			delete[] depthPts;
-			delete[] depthPix;
-
-		}
-
-		// if you're mapping color pix to depth space, downscale color pix
-		if(mappingDepthToColor && beginMappingDepthToColor)
-		{
-
-			NUI_COLOR_IMAGE_POINT  *pts = new NUI_COLOR_IMAGE_POINT[colorFormat.dwHeight*colorFormat.dwWidth];
+			NUI_DEPTH_IMAGE_POINT  *pts = new NUI_DEPTH_IMAGE_POINT[colorFormat.dwHeight*colorFormat.dwWidth];
 			NUI_DEPTH_IMAGE_PIXEL  *depth = new NUI_DEPTH_IMAGE_PIXEL[depthFormat.dwHeight*depthFormat.dwWidth];
 
 			int i = 0; 
@@ -220,8 +168,9 @@ void ofxKinectCommonBridge::update()
 			}
 
 			HRESULT mapResult;
-			mapResult = KinectMapDepthFrameToColorFrame(hKinect, colorRes, depthFormat.dwHeight*depthFormat.dwWidth, depth, NUI_IMAGE_TYPE_COLOR, depthRes,
-						colorFormat.dwHeight*colorFormat.dwWidth, pts);
+			mapResult = mapper->MapColorFrameToDepthFrame(NUI_IMAGE_TYPE_COLOR, NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_640x480,
+						640 * 480, depth,
+						640 * 480, pts);
 
 			for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ )
 			{
@@ -231,7 +180,7 @@ void ofxKinectCommonBridge::update()
 			delete[] pts;
 			delete[] depth;
 
-		}
+		}*/
 
 		bNeedsUpdateVideo = false;
 
@@ -363,27 +312,6 @@ void ofxKinectCommonBridge::update()
 	} else {
 		bNeedsUpdateSkeleton = false;
 	}
-#ifdef KCB_ENABLE_SPEECH
-	if(bUpdateSpeech)
-	{
-		ofxKCBSpeechEvent spEvent;
-		spEvent.detectedSpeech = speechData.detectedSpeech;
-		spEvent.confidence = speechData.confidence;
-
-		ofNotifyEvent( ofxKCBSpeechEvent::event, spEvent, this);
-
-		bUpdateSpeech = false;
-	}
-#endif
-
-#ifdef KCB_ENABLE_FT
-	if(bUpdateFaces)
-	{
-		//swap<ofxKCBFace>( faceData, faceDataBack ); // copy it in, need lock?
-		faceData = faceDataBack;
-		bIsFaceNew = true;
-	}
-#endif
 }
 
 //------------------------------------
@@ -405,13 +333,6 @@ ofShortPixels & ofxKinectCommonBridge::getRawDepthPixelsRef(){
 void ofxKinectCommonBridge::setUseTexture(bool bUse){
 	bUseTexture = bUse;
 }
-
-//------------------------------------
-
-void ofxKinectCommonBridge::setUseStreams(bool bUse){
-	bUseStreams = bUse;
-}
-
 
 //----------------------------------------------------------
 void ofxKinectCommonBridge::draw(float _x, float _y, float _w, float _h) {
@@ -656,13 +577,11 @@ bool ofxKinectCommonBridge::initColorStream( int width, int height, bool mapColo
 		ofLog() << "allocating a buffer of size " << colorFormat.dwWidth*colorFormat.dwHeight*sizeof(unsigned char)*4 << " when k4w wants size " << colorFormat.cbBufferSize << endl;
 		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
 		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
-		if(bUseTexture)
-		{
+		if(bUseTexture){
 			videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
 		}
 	}
-	else
-	{
+	else{
 		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
@@ -727,36 +646,6 @@ bool ofxKinectCommonBridge::initIRStream( int width, int height )
 	return true;
 }
 
-#ifdef KCB_ENABLE_FT
-bool ofxKinectCommonBridge::initFaceTracking() {
-
-	// initialize camera params if we don't already
-	// have a Kinect
-	if( hKinect == 0) 
-	{
-		hKinect = KinectOpenDefaultSensor();
-	}
-
-	if( KCB_INVALID_HANDLE == hKinect )
-    {
-		ofLogError() << "initFaceTracking: KinectOpenDefaultSensor() " << endl;
-        // this rarely happens and may be a memory issue typically
-        return false;
-    }
-
-	// enable face tracking
-    HRESULT hr = KinectEnableFaceTracking(hKinect, true);
-    if(FAILED(hr)) {
-		ofLogError() << "KinectEnableFaceTracking: unable to enable face tracking" << endl;
-	} else {
-		bIsTrackingFace = true;
-	}
-
-	bUseStreams = false;
-    return SUCCEEDED(hr);
-}
-#endif
-
 bool ofxKinectCommonBridge::initSkeletonStream( bool seated )
 {
 	if(bStarted){
@@ -798,120 +687,22 @@ bool ofxKinectCommonBridge::start()
 		initSensor();
 	}
 
-	HRESULT hr;
-
-	if(!bInited && bUseStreams){
-		cout << " init default streams " << endl;
+	if(!bInited){
+		cout << "init stuff" << endl;
 
 		initColorStream(640,480);
 		initDepthStream(320,240);
-		hr = KinectStartStreams(hKinect);
-
-		if( FAILED(hr) )
-		{
-			return false;
-		}
-
 	}
 
+    HRESULT hr = KinectStartStreams(hKinect);
+    if( FAILED(hr) )
+    {
+        return false;
+    }
 	startThread(true, false);
 	bStarted = true;	
 	return true;
 }
-
-// if you don't load a grammar we can just use the basic
-bool ofxKinectCommonBridge::loadGrammar( string filename )
-{
-	bHasLoadedGrammar = true;
-
-	return true; // make this non stupid
-}
-
-#ifdef KCB_ENABLE_FT
-
-void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
-{
-
-	FT_VECTOR2D* points2D;
-	UINT pointCount;
-	ftResult->Get2DShapePoints( &points2D, &pointCount );
-
-	RECT pRect;
-	ftResult->GetFaceRect( &pRect );
-	
-	faceDataBack.rect.set( ofVec2f(pRect.left, pRect.top), ofVec2f(pRect.right, pRect.bottom ));
-
-	FLOAT *AUCoefficients;
-    UINT AUCount;
-    ftResult->GetAUCoefficients(&AUCoefficients, &AUCount);
-
-    FLOAT scale, rotationXYZ[3], translationXYZ[3];
-    ftResult->Get3DPose(&scale, rotationXYZ, translationXYZ);
-
-	faceDataBack.rotation.set(rotationXYZ[0], rotationXYZ[1], rotationXYZ[2]);
-	faceDataBack.translation.set(translationXYZ[0], translationXYZ[1], translationXYZ[2]);
-
-	for( UINT i = 0; i<pointCount; i++) 
-	{
-		ofVec3f v( points2D[i].x, points2D[i].y, 0);
-		faceDataBack.mesh.getVertices().push_back(v);
-	}
-
-	// clean up?
-	//free( AUCoefficients );
-	//free( points2D );
-}
-
-#endif
-
-bool ofxKinectCommonBridge::initAudio()
-{
-	AEC_SYSTEM_MODE mode = OPTIBEAM_ARRAY_ONLY;
-	KinectEnableAudioStream(hKinect, &mode, false);
-	HRESULT hr = KinectStartAudioStream(hKinect);
-	if( SUCCEEDED(hr)) {
-		return true;
-	}
-	return false;
-}
-
-#ifdef KCB_ENABLE_SPEECH
-bool ofxKinectCommonBridge::initSpeech()
-{
-
-	//KCB_SPEECH_LANGUAGE *lang;
-	ULONGLONG interest;
-	bool adaptive = false;
-
-	HRESULT hr; 
-
-	// testing
-	//string path = "C:\\en-US.grxml";
-	//WCHAR file[255];
-	
-	int sz = MultiByteToWideChar(CP_UTF8, 0, grammarFile.c_str(), -1, NULL, 0);
-	WCHAR *file = new WCHAR[sz];
-	MultiByteToWideChar(CP_UTF8, 0, grammarFile.c_str(), -1, file, sz);
-
-	KinectEnableSpeech(hKinect, &file[0], NULL, NULL, &adaptive);
-
-	hr = KinectStartSpeech(hKinect);
-	if(hr != S_OK)
-	{
-		ofLogError(" ofxKinectCommonBridge::startSpeech cannot start speech" );
-		return false;
-	}
-
-	bUsingSpeech = true;
-	bInited = true;
-	return true;
-}
-#endif
-
-//bool ofxKinectCommonBridge::startAudioStream()
-//{
-//
-//}
 
 //----------------------------------------------------------
 KCBHANDLE ofxKinectCommonBridge::getHandle() {
@@ -935,8 +726,6 @@ void ofxKinectCommonBridge::stop() {
 		waitForThread(true);
 		bStarted = false;
 
-		KinectCloseSensor(hKinect); // release the handle
-
 		// release these interfaces when done
 		if (mapper)
 		{
@@ -948,17 +737,18 @@ void ofxKinectCommonBridge::stop() {
 			nuiSensor->Release();
 			nuiSensor = nullptr;
 		}
+				KinectStopStreams( hKinect );
+		KinectCloseSensor( hKinect );
 
 	}
-}
-
+}	
 
 //----------------------------------------------------------
 void ofxKinectCommonBridge::threadedFunction(){
 
 	LONGLONG timestamp;
 	
-	ofLogNotice( "ofxKCB",  "starting device data thread ");
+	cout << "STARTING THREAD" << endl;
 
 	//JG: DO WE NEED TO BAIL ON THIS LOOP IF THE DEVICE QUITS? 
 	//how can we tell?
@@ -996,82 +786,10 @@ void ofxKinectCommonBridge::threadedFunction(){
 			}
 		}
 
-#ifdef KCB_ENABLE_SPEECH
-		if(bUsingSpeech)
-		{
-			if(KinectIsSpeechEventReady(hKinect))
-			{
-				// dispatch an event
-				//https://github.com/Traksewt/molecular-control-toolkit/blob/master/Controllers/KinectNativeController/SpeechBasics.cpp
-				SPEVENT spevent;
-				ULONG fetched;
-				HRESULT hr = S_OK;
-				KinectGetSpeechEvent(hKinect, &spevent, &fetched);
-
-				// just look for speech events here. can+should be optimized
-				while (fetched > 0)
-				{
-					switch (spevent.eEventId)
-					{
-						case SPEI_RECOGNITION:
-							if (SPET_LPARAM_IS_OBJECT == spevent.elParamType)
-							{
-								// this is an ISpRecoResult
-								ISpRecoResult* result = reinterpret_cast<ISpRecoResult*>(spevent.lParam);
-								SPPHRASE* pPhrase = NULL;
-                    
-								hr = result->GetPhrase(&pPhrase);
-								if (SUCCEEDED(hr))
-								{
-									if ((pPhrase->pProperties != NULL) && (pPhrase->pProperties->pFirstChild != NULL))
-									{
-										const SPPHRASEPROPERTY* pSemanticTag = pPhrase->pProperties->pFirstChild;
-										if (pSemanticTag->SREngineConfidence > speechConfidenceThreshold)
-										{
-											//updateSpeechData( pSemanticTag );
-											bUpdateSpeech = true;
-											char pmbbuf[255];
-											int size = wcstombs(&pmbbuf[0], pSemanticTag->pszValue, 255);
-											speechData.detectedSpeech = pmbbuf;
-											speechData.detectedSpeech.resize(size+1);
-											speechData.confidence = pSemanticTag->SREngineConfidence;
-										}
-									}
-									// necessary?
-									::CoTaskMemFree(pPhrase);
-								}
-							}
-							break;
-					}
-
-					KinectGetSpeechEvent(hKinect, &spevent, &fetched);
-				}
-			}
-		}
-#endif
-
-		/*if(bUsingAudio) {	 // not doing audio quite yet
-		}*/
-#ifdef KCB_ENABLE_FT
-
-		if(bIsTrackingFace)
-		{
-			IFTResult *ftResult;
-
-			if(KinectIsFaceTrackingResultReady(hKinect))
-            {
-                IFTResult* pResult;
-
-				if (SUCCEEDED(KinectGetFaceTrackingResult(hKinect, &pResult)) && SUCCEEDED(pResult->GetStatus()))
-                {
-					updateFaceTrackingData(pResult);
-					bUpdateFaces = true;
-                }
-            }
-		}
-#endif
-
+		//TODO: TILT
+		//TODO: ACCEL
+		//TODO: FACE
+		//TODO: AUDIO
 		ofSleepMillis(10);
 	}
-
 }
