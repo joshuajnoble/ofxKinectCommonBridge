@@ -109,14 +109,19 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool initSensor( int id = 0 );
 	bool initDepthStream( int width, int height, bool nearMode = false, bool mapColorToDepth = false );
 	bool initColorStream( int width, int height, bool mapColorToDepth = false );
-	bool initFaceTracking(); // no params, can't use with other stuff either.
 	bool initIRStream( int width, int height );
 	bool initSkeletonStream( bool seated );
 	bool start();
+
 	KCBHANDLE getHandle();
 	INuiSensor & getNuiSensor();
 
+#ifdef KCB_ENABLE_FT
+	bool initFaceTracking(); // no params, can't use with other stuff either.
+#endif
+
 	// audio functionality
+#ifdef KCB_ENABLE_SPEECH
 	bool startAudioStream();
 	bool initSpeech();
 	bool loadGrammar(string filename);
@@ -124,6 +129,8 @@ class ofxKinectCommonBridge : protected ofThread {
 	// speech
 	bool hasNewSpeechData();
 	SpeechData getNewSpeechData();
+
+#endif
 
 	void stop();
 
@@ -247,6 +254,8 @@ class ofxKinectCommonBridge : protected ofThread {
 	bool bNeedsUpdateDepth;
 	bool bNeedsUpdateSkeleton;
 	bool bIsSkeletonFrameNew;
+	bool bUsingFaceTrack;
+
 	bool bUpdateSpeech;
 	bool bUpdateFaces;
 	bool bIsFaceNew;
