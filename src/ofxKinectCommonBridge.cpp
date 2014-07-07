@@ -108,7 +108,13 @@ ofxKinectCommonBridge::ofxKinectCommonBridge(){
 	bVideoIsInfrared = false;
 	bUsingSpeech = false;
 	bUsingFaceTrack = false;
-	bInited = false;
+	bInitedColor = false;
+	bInitedDepth = false;
+	bInitedIR = false;
+
+#ifdef KCB_USING_SPEECH
+	bInitedSpeech = false;
+#endif
 	bStarted = false;
 
 	mappingColorToDepth = false;
@@ -620,7 +626,7 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
 		return false;
 	}
-	bInited = true;
+	bInitedDepth = true;
 	return true;
 }
 
@@ -676,7 +682,7 @@ bool ofxKinectCommonBridge::initColorStream( int width, int height, bool mapColo
 		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
 		return false;
 	}
-	bInited = true;
+	bInitedColor = true;
 	return true;
 }
 
@@ -733,7 +739,7 @@ bool ofxKinectCommonBridge::initIRStream( int width, int height )
 		return false;
 	}
 
-	bInited = true;
+	bInitedIR = true;
 	return true;
 }
 
@@ -793,7 +799,7 @@ bool ofxKinectCommonBridge::initSpeech()
 	}
 
 	bUsingSpeech = true;
-	bInited = true;
+	bInitedSpeech = true;
 	return true;
 }
 #endif
@@ -801,11 +807,10 @@ bool ofxKinectCommonBridge::initSpeech()
 #ifdef KCB_ENABLE_FT
 bool ofxKinectCommonBridge::initFaceTracking() {
 
-	// initialize camera params if we don't already
-	// have a Kinect
+	// initialize camera params if we don't already have a Kinect
 	if( hKinect == 0) 
 	{
-		hKinect = KinectOpenDefaultSensor();
+		//hKinect = KinectOpenDefaultSensor();
 	}
 
 	if( KCB_INVALID_HANDLE == hKinect )
@@ -841,20 +846,25 @@ bool ofxKinectCommonBridge::start()
 		initSensor();
 	}
 
-	if(!bInited){
-		cout << "init stuff" << endl;
-
+	if(!bInitedColor && bUseStreams)
+	{
 		initColorStream(640,480);
+	}
+
+	if(!bInitedDepth && bUseStreams)
+	{
 		initDepthStream(320,240);
 	}
 
-    HRESULT hr = KinectStartStreams(hKinect);
-    if( FAILED(hr) )
-    {
-        return false;
-    }
+	HRESULT hr = KinectStartStreams(hKinect);
+	if( FAILED(hr) )
+	{
+		return false;
+	}
+
 	startThread(true, false);
 	bStarted = true;	
+
 	return true;
 }
 
@@ -891,7 +901,8 @@ void ofxKinectCommonBridge::stop() {
 			nuiSensor->Release();
 			nuiSensor = nullptr;
 		}
-				KinectStopStreams( hKinect );
+		
+		KinectStopStreams( hKinect );
 		KinectCloseSensor( hKinect );
 
 	}

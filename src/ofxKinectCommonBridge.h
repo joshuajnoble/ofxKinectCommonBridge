@@ -1,6 +1,6 @@
 #pragma once
 
-//#define KCB_ENABLE_FT
+#define KCB_ENABLE_FT
 //#define KCB_ENABLE_SPEECH
 
 #include "KinectCommonBridgeLib.h"
@@ -213,7 +213,7 @@ class ofxKinectCommonBridge : protected ofThread {
 	KINECT_IMAGE_FRAME_FORMAT colorFormat;
 	NUI_SKELETON_FRAME k4wSkeletons;
 
-  	bool bInited;
+  	bool bInitedColor, bInitedDepth, bInitedIR;
 	bool bStarted;
 	vector<Skeleton> skeletons;
 
@@ -287,6 +287,10 @@ class ofxKinectCommonBridge : protected ofThread {
     FLOAT zoomFactor;
 
 #endif
+
+#ifdef KCB_ENABLE_SPEECH
+	bool bInitedSpeech;
+#endif 
 
 	bool bVideoIsInfrared;
 	bool bUsingSkeletons;

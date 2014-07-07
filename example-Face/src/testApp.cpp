@@ -3,7 +3,11 @@
 //--------------------------------------------------------------
 void testApp::setup(){
 
+	kinect.initSensor(0);
+	kinect.initColorStream(640, 480);
+	kinect.initDepthStream(320, 240);
 	kinect.initFaceTracking();
+
 	kinect.start();
 }
 
@@ -33,6 +37,7 @@ void testApp::draw()
 	ofSetColor(255, 255, 255 );
 	face.mesh.drawWireframe(); // draw the mesh of the face
 }
+
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
