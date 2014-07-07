@@ -138,6 +138,20 @@ Right now the Face Tracking and Speech detection require that you have the Profe
 //#define KCB_ENABLE_SPEECH
 ```
 
+You'll also need to change your linker settings just a little so that you're linking against:
+
+```cpp
+ofxKinectCommonBridge/libs/KinectCommonBridge/lib/windows/vs_Speech
+```
+
+instead of 
+
+```cpp
+ofxKinectCommonBridge/libs/KinectCommonBridge/lib/windows/vs
+```
+
+A pain, I know, but I had to compile the KinectCommonBridge library differently to get everything we needed included without breaking it for other folks.
+
 FaceTracking is pretty straight forward:
 
 ```cpp
@@ -229,3 +243,5 @@ So, you're probably wondering: what's the detected speech? It's going to be a ta
 ```
 
 You can build much more complex ones. 
+
+Linker settings for Face and Speech tracking!
