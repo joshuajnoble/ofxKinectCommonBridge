@@ -246,6 +246,4 @@ So, you're probably wondering: what's the detected speech? It's going to be a ta
 </grammar>
 ```
 
-You can build much more complex ones. 
-
-Linker settings for Face and Speech tracking!
+You can build much more complex ones, of course.
