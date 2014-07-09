@@ -374,9 +374,12 @@ void ofxKinectCommonBridge::update()
 void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 {
 
-	FT_VECTOR2D* points2D;
-	UINT pointCount;
-	ftResult->Get2DShapePoints( &points2D, &pointCount );
+	zoomFactor = 1.0;
+
+	//FT_VECTOR2D* points2D;
+	//UINT pointCount;
+
+	//ftResult->Get2DShapePoints( &points2D, &pointCount );
 
 	RECT pRect;
 	ftResult->GetFaceRect( &pRect );
@@ -393,15 +396,51 @@ void ofxKinectCommonBridge::updateFaceTrackingData( IFTResult* ftResult )
 	faceDataBack.rotation.set(rotationXYZ[0], rotationXYZ[1], rotationXYZ[2]);
 	faceDataBack.translation.set(translationXYZ[0], translationXYZ[1], translationXYZ[2]);
 
-	for( UINT i = 0; i<pointCount; i++) 
+	IFTFaceTracker *ftracker;
+	KinectGetFaceTracker( hKinect, &ftracker );
+
+	FLOAT* pSU = NULL;
+    UINT numSU;
+    BOOL suConverged;
+    ftracker->GetShapeUnits(NULL, &pSU, &numSU, &suConverged);
+
+	IFTModel *ftModel;
+	ftracker->GetFaceModel( &ftModel );
+
+	FT_CAMERA_CONFIG ftCameraConfig;
+	KinectGetColorStreamCameraConfig( hKinect, ftCameraConfig );
+
+	POINT viewOffset = {0, 0};
+
+	UINT vertexCount = ftModel->GetVertexCount();
+    FT_VECTOR2D* pPts2D = reinterpret_cast<FT_VECTOR2D*>(_malloca(sizeof(FT_VECTOR2D) * vertexCount));
+
+	ftModel->GetProjectedShape(&ftCameraConfig, zoomFactor, viewOffset, pSU, ftModel->GetSUCount(), AUCoefficients, 
+		AUCount, scale, rotationXYZ, translationXYZ, pPts2D, vertexCount);
+
+	FT_TRIANGLE* pTriangles;
+    UINT triangleCount;
+    ftModel->GetTriangles(&pTriangles, &triangleCount);
+
+	faceDataBack.mesh.clear();
+	for( UINT i = 0; i<vertexCount; i++) 
 	{
-		ofVec3f v( points2D[i].x, points2D[i].y, 0);
+		ofVec3f v( pPts2D[i].x, pPts2D[i].y, 0);
 		faceDataBack.mesh.getVertices().push_back(v);
 	}
 
-	// clean up?
-	//free( AUCoefficients );
-	//free( points2D );
+	for( UINT i = 0; i<triangleCount; i++) 
+	{
+		//if( pTriangles[i].i < pointCount && pTriangles[i].j < pointCount && pTriangles[i].k < pointCount )
+		//{
+			faceDataBack.mesh.addTriangle( pTriangles[i].i, pTriangles[i].j, pTriangles[i].k );
+		//}
+	}
+
+	_freea(pPts2D);
+
+	ftModel->Release();
+	ftracker->Release();
 }
 
 ofxKCBFace& ofxKinectCommonBridge::getFaceData() {
@@ -588,9 +627,32 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 
 	KINECT_IMAGE_FRAME_FORMAT df = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
     KinectEnableDepthStream(hKinect, nearMode, depthRes, &df);
-    if( KinectStreamStatusError != KinectGetDepthStreamStatus(hKinect) ){
+    if( KinectStreamStatusError != KinectGetDepthStreamStatus(hKinect) )
+	{
 		depthFormat = df;
-		
+		createDepthPixels();
+	} 
+	else
+	{
+		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
+		return false;
+	}
+	bInitedDepth = true;
+	return true;
+}
+
+bool ofxKinectCommonBridge::createDepthPixels( int width, int height )
+{
+
+	if(height != 0 && width != 0) {
+		depthFormat.dwWidth = width; // this might not work for you if you don't use a proper size;
+		depthFormat.dwHeight = height; // this might not work for you if you don't use a proper size;
+		depthFormat.cbBufferSize = width * height * 2;
+		depthFormat.cbBytesPerPixel = 2;
+	}
+
+    if( hKinect != 0 )
+	{
 		if(bProgrammableRenderer) {
 			depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_COLOR);
 			depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_COLOR);
@@ -602,9 +664,10 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 		depthPixelsRaw.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 		depthPixelsRawBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_GRAYSCALE);
 
-		if(bUseTexture){
-
-			if(bProgrammableRenderer) {
+		if(bUseTexture)
+		{
+			if(bProgrammableRenderer)
+			{
 				//int w, int h, int glInternalFormat, bool bUseARBExtention, int glFormat, int pixelType
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_R8);//, true, GL_R8, GL_UNSIGNED_BYTE);
 				depthTex.setRGToRGBASwizzles(true);
@@ -615,15 +678,18 @@ bool ofxKinectCommonBridge::initDepthStream( int width, int height, bool nearMod
 
 				cout << rawDepthTex.getWidth() << " " << rawDepthTex.getHeight() << endl;
 				//depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_RGB);
-			} else {
+			} 
+			else 
+			{
 				depthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE);
 				rawDepthTex.allocate(depthFormat.dwWidth, depthFormat.dwHeight, GL_LUMINANCE16);
 			}
 		}
 
 	} 
-	else{
-		ofLogError("ofxKinectCommonBridge::open") << "Error opening depth stream";
+	else
+	{
+		ofLogError("ofxKinectCommonBridge::createDepthPixels") << " No Kinect ";
 		return false;
 	}
 	bInitedDepth = true;
@@ -649,11 +715,6 @@ bool ofxKinectCommonBridge::initColorStream( int width, int height, bool mapColo
 		ofLogWarning("ofxKinectCommonBridge::initColorStream") << " mapping color to depth is not yet supported " << endl;
 	}
 
-	if(bStarted){
-		ofLogError("ofxKinectCommonBridge::initColorStream") << " Cannot configure once the sensor has already started";
-		return false;
-	}
-
 	KINECT_IMAGE_FRAME_FORMAT cf = { sizeof(KINECT_IMAGE_FRAME_FORMAT), 0 };
 
 	if( width == 320 ) {
@@ -669,21 +730,36 @@ bool ofxKinectCommonBridge::initColorStream( int width, int height, bool mapColo
     KinectEnableColorStream(hKinect, colorRes, &cf);
 	if( KinectStreamStatusError != KinectGetColorStreamStatus(hKinect) )
 	{
-		//BYTE* pColorBuffer = new BYTE[format.cbBufferSize];
 		colorFormat = cf;
-		ofLog() << "allocating a buffer of size " << colorFormat.dwWidth*colorFormat.dwHeight*sizeof(unsigned char)*4 << " when k4w wants size " << colorFormat.cbBufferSize << endl;
-		videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
-		videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight,OF_IMAGE_COLOR_ALPHA);
-		if(bUseTexture){
-			videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
-		}
+		createColorPixels();
 	}
-	else{
-		ofLogError("ofxKinectCommonBridge::open") << "Error opening color stream";
+
+	if(bStarted){
+		ofLogError("ofxKinectCommonBridge::initColorStream") << " Cannot configure once the sensor has already started";
 		return false;
 	}
+
 	bInitedColor = true;
 	return true;
+}
+
+bool ofxKinectCommonBridge::createColorPixels( int width, int height )
+{
+
+	if(height != 0 && width != 0) {
+		colorFormat.dwWidth = width; // this might not work for you if you don't use a proper size;
+		colorFormat.dwHeight = height; // this might not work for you if you don't use a proper size;
+		colorFormat.cbBufferSize = width * height * 4;
+		colorFormat.cbBytesPerPixel = 4;
+	}
+
+	videoPixels.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_COLOR_ALPHA);
+	videoPixelsBack.allocate(colorFormat.dwWidth, colorFormat.dwHeight, OF_IMAGE_COLOR_ALPHA);
+	if(bUseTexture)
+	{
+		videoTex.allocate(colorFormat.dwWidth, colorFormat.dwHeight, GL_RGBA);
+	}
+	return true; // remove this
 }
 
 bool ofxKinectCommonBridge::initIRStream( int width, int height )
@@ -810,7 +886,9 @@ bool ofxKinectCommonBridge::initFaceTracking() {
 	// initialize camera params if we don't already have a Kinect
 	if( hKinect == 0) 
 	{
-		//hKinect = KinectOpenDefaultSensor();
+		hKinect = KinectOpenDefaultSensor();
+		createDepthPixels(320, 240);
+		createColorPixels(640, 480);
 	}
 
 	if( KCB_INVALID_HANDLE == hKinect )
@@ -822,9 +900,13 @@ bool ofxKinectCommonBridge::initFaceTracking() {
 
 	// enable face tracking
     HRESULT hr = KinectEnableFaceTracking(hKinect, true);
-    if(FAILED(hr)) {
+    
+	if(FAILED(hr))
+	{
 		ofLogError() << "KinectEnableFaceTracking: unable to enable face tracking" << endl;
-	} else {
+	} 
+	else 
+	{
 		bUsingFaceTrack = true;
 	}
 

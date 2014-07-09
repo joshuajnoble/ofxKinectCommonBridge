@@ -4,8 +4,8 @@
 void testApp::setup(){
 
 	kinect.initSensor(0);
-	kinect.initColorStream(640, 480);
-	kinect.initDepthStream(320, 240);
+	//kinect.initColorStream(640, 480);
+	//kinect.initDepthStream(320, 240);
 	kinect.initFaceTracking();
 
 	kinect.start();

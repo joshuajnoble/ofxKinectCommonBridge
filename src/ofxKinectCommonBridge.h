@@ -28,7 +28,7 @@ public:
 	ofxKCBFace & operator=(const ofxKCBFace & rhs) {
 		rotation = rhs.rotation;
 		translation = rhs.translation;
-		//mesh = rhs.mesh; // this is causing problems
+		mesh = rhs.mesh;
 		rect = rhs.rect;
 
 		return *this;
@@ -107,7 +107,9 @@ class ofxKinectCommonBridge : protected ofThread {
 
 	// new API
 	bool initSensor( int id = 0 );
+	bool createDepthPixels( int width = 0, int height = 0 );
 	bool initDepthStream( int width, int height, bool nearMode = false, bool mapColorToDepth = false );
+	bool createColorPixels( int width = 0, int height = 0 );
 	bool initColorStream( int width, int height, bool mapColorToDepth = false );
 	bool initIRStream( int width, int height );
 	bool initSkeletonStream( bool seated );
