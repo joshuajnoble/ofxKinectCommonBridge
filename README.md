@@ -138,6 +138,10 @@ Right now the Face Tracking and Speech detection require that you have the Profe
 //#define KCB_ENABLE_SPEECH
 ```
 
+OR (and even better)
+
+Add to your Command Line arguments in Project Properties, it's in C++ properties.
+
 You'll also need to change your linker settings just a little so that you're linking against:
 
 ```cpp
