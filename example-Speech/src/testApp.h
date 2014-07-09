@@ -26,4 +26,6 @@ class testApp : public ofBaseApp{
 	ofPlanePrimitive plane;
 
 	void speechEvent( ofxKCBSpeechEvent & speechEvt );
+
+	string lastSpeech;
 };

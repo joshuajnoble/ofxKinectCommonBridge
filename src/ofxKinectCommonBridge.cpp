@@ -1070,7 +1070,7 @@ void ofxKinectCommonBridge::threadedFunction(){
 											int size = wcstombs(&pmbbuf[0], pSemanticTag->pszValue, 255);
 											speechData.detectedSpeech = pmbbuf;
 											speechData.detectedSpeech.resize(size+1);
-											speechData.confidence = pSemanticTag->SREngineConfidence;
+											speechData.confidence = pSemanticTag->SREngineConfidence; //??
 										}
 									}
 									// necessary?

@@ -3,11 +3,11 @@
 //--------------------------------------------------------------
 void testApp::setup(){
 
+	lastSpeech = "";
+
 	kinect.initSensor(0);
 	string grammarPath = ofToDataPath("grammar\\SpeechBasics-D2D.grxml", true);
-	//string grammarPath = "C:\\SpeechBasics-D2D.grxml";
 	kinect.setSpeechGrammarFile(grammarPath);
-	//kinect.initAudio();
 	kinect.initSpeech();
 	kinect.start();
 
@@ -28,7 +28,7 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw()
 {
-	
+	ofDrawBitmapString(lastSpeech, (ofGetWidth()/2) - (lastSpeech.size()*5), (ofGetHeight()/2));
 }
 
 void testApp::speechEvent( ofxKCBSpeechEvent & speechEvt )
@@ -36,6 +36,8 @@ void testApp::speechEvent( ofxKCBSpeechEvent & speechEvt )
 	cout << " got speech event " << endl;
 	cout << " detected " << speechEvt.detectedSpeech << endl;
 	cout << " confidence " << speechEvt.confidence << endl;
+
+	lastSpeech = speechEvt.detectedSpeech;
 }
 
 //--------------------------------------------------------------

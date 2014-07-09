@@ -1,6 +1,6 @@
 #pragma once
 
-#define KCB_ENABLE_FT
+//#define KCB_ENABLE_FT
 //#define KCB_ENABLE_SPEECH
 
 #include "KinectCommonBridgeLib.h"
