@@ -154,6 +154,7 @@ class ofxKinectCommonBridge : protected ofThread {
 	ofPixels& getColorPixelsRef();
 	ofPixels & getDepthPixelsRef();       	///< grayscale values
 	ofShortPixels & getRawDepthPixelsRef();	///< raw 11 bit values
+	NUI_DEPTH_IMAGE_PIXEL* getNuiDepthPixelsRef();
 
 	/// enable/disable frame loading into textures on update()
 	void setUseTexture(bool bUse);
@@ -246,6 +247,7 @@ class ofxKinectCommonBridge : protected ofThread {
 	ofPixels depthPixelsBack;
 	ofShortPixels depthPixelsRaw;
 	ofShortPixels depthPixelsRawBack;	///< depth back
+	NUI_DEPTH_IMAGE_PIXEL* depthPixelsNui;
 
 	ofPixels irPixels;
 	ofPixels irPixelsBack;
