@@ -258,17 +258,16 @@ void ofxKinectCommonBridge::update()
 		if(mappingDepthToColor) 
 		{
 			NUI_COLOR_IMAGE_POINT *pts = new NUI_COLOR_IMAGE_POINT[colorFormat.dwWidth*colorFormat.dwHeight];
-			NUI_DEPTH_IMAGE_PIXEL * depth = new NUI_DEPTH_IMAGE_PIXEL[(depthFormat.dwWidth*depthFormat.dwHeight)];
 			
 			int i = 0; 
 			while ( i < (depthFormat.dwWidth*depthFormat.dwHeight)) {
-				depth[i].depth = (USHORT) depthPixelsRaw.getPixels()[i];
-				depth[i].playerIndex = 0;
+				depthPixelsNui[i].depth = NuiDepthPixelToDepth(depthPixelsRaw[i]);
+				depthPixelsNui[i].playerIndex = NuiDepthPixelToPlayerIndex(depthPixelsRaw[i]);
 				i++;
 			}
 			
 			HRESULT mapResult;
-			mapResult = mapper->MapDepthFrameToColorFrame(depthRes, (depthFormat.dwWidth*depthFormat.dwHeight), depth, NUI_IMAGE_TYPE_COLOR, colorRes, (depthFormat.dwWidth*depthFormat.dwHeight), pts);
+			mapResult = mapper->MapDepthFrameToColorFrame(depthRes, (depthFormat.dwWidth*depthFormat.dwHeight), depthPixelsNui, NUI_IMAGE_TYPE_COLOR, colorRes, (depthFormat.dwWidth*depthFormat.dwHeight), pts);
 
 			if(SUCCEEDED(mapResult))
 			{
@@ -285,7 +284,6 @@ void ofxKinectCommonBridge::update()
 			}
 
 			delete[] pts;
-			delete[] depth;
 		
 			for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
 				depthPixelsRaw[i] = depthPixelsRaw[i] >> 4;
@@ -295,6 +293,8 @@ void ofxKinectCommonBridge::update()
 
 			for(int i = 0; i < depthPixels.getWidth()*depthPixels.getHeight(); i++) {
 				depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[i] >> 4, 0, depthLookupTable.size()-1 ) ];
+				depthPixelsNui[i].depth = NuiDepthPixelToDepth(depthPixelsRaw[i]);
+				depthPixelsNui[i].playerIndex = NuiDepthPixelToPlayerIndex(depthPixelsRaw[i]);
 				depthPixelsRaw[i] = depthPixelsRaw[i] >> 4;
 			}
 		}
@@ -463,6 +463,11 @@ ofPixels & ofxKinectCommonBridge::getDepthPixelsRef(){       	///< grayscale val
 //------------------------------------
 ofShortPixels & ofxKinectCommonBridge::getRawDepthPixelsRef(){
 	return depthPixelsRaw;
+}
+
+//------------------------------------
+NUI_DEPTH_IMAGE_PIXEL* ofxKinectCommonBridge::getNuiDepthPixelsRef(){
+	return depthPixelsNui;
 }
 
 //------------------------------------
@@ -653,6 +658,8 @@ bool ofxKinectCommonBridge::createDepthPixels( int width, int height )
 
     if( hKinect != 0 )
 	{
+		depthPixelsNui = new NUI_DEPTH_IMAGE_PIXEL[(depthFormat.dwWidth*depthFormat.dwHeight)];
+
 		if(bProgrammableRenderer) {
 			depthPixels.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_COLOR);
 			depthPixelsBack.allocate(depthFormat.dwWidth, depthFormat.dwHeight, OF_IMAGE_COLOR);
@@ -982,6 +989,10 @@ void ofxKinectCommonBridge::stop() {
 		{
 			nuiSensor->Release();
 			nuiSensor = nullptr;
+		}
+
+		if(depthPixelsNui){
+			delete[] depthPixelsNui;
 		}
 		
 		KinectStopStreams( hKinect );
