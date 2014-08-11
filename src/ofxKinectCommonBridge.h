@@ -103,7 +103,6 @@ typedef map<_NUI_SKELETON_POSITION_INDEX, SkeletonBone> Skeleton;
 
 class ofxKinectCommonBridge : protected ofThread {
   public:
-
 	ofxKinectCommonBridge();
 
 	// new API
@@ -245,7 +244,6 @@ class ofxKinectCommonBridge : protected ofThread {
 	ofPixels videoPixels;
 	ofPixels videoPixelsBack;			///< rgb back
 	ofPixels depthPixels;
-	ofPixels playerPixels;
 	ofPixels depthPixelsBack;
 	ofShortPixels depthPixelsRaw;
 	ofShortPixels depthPixelsRawBack;	///< depth back
