@@ -271,12 +271,20 @@ void ofxKinectCommonBridge::update()
 
 			if(SUCCEEDED(mapResult))
 			{
+				// @Thibaut For now, assume the depth and color image are the same size for the mapping
+				if (colorFormat.dwWidth != depthFormat.dwWidth || colorFormat.dwHeight != depthFormat.dwHeight) {
+					ofLog(OF_LOG_ERROR) << "Mapping depth frame to color frame is not support yet for different resolutions";
+				}
+				for (int i = 0; i < (colorFormat.dwWidth*colorFormat.dwHeight); ++i) {
+					depthPixels[i] = 0;
+					playerPixels[i] = 0;
+				}
 
 				for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ ) {
 					if(pts[i].x > 0 && pts[i].x < depthFormat.dwWidth && pts[i].y > 0 && pts[i].y < depthFormat.dwHeight) {
-						depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[pts[i].y * depthFormat.dwWidth + pts[i].x] >> 4, 0, depthLookupTable.size()-1 ) ];
-					} else {
-						depthPixels[i] = 0;
+						//depthPixels[i] = depthLookupTable[ ofClamp(depthPixelsRaw[pts[i].y * depthFormat.dwWidth + pts[i].x] >> 4, 0, depthLookupTable.size()-1 ) ];
+						int colorImageIndex = pts[i].y * depthFormat.dwWidth + pts[i].x;
+						depthPixels[colorImageIndex] = depthLookupTable[ofClamp(depthPixelsRaw[i] >> 4, 0, depthLookupTable.size() - 1)];
 					}
 				}
 			} else {
