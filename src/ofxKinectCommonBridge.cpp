@@ -277,7 +277,6 @@ void ofxKinectCommonBridge::update()
 				}
 				for (int i = 0; i < (colorFormat.dwWidth*colorFormat.dwHeight); ++i) {
 					depthPixels[i] = 0;
-					playerPixels[i] = 0;
 				}
 
 				for( int i = 0; i < (depthFormat.dwWidth*depthFormat.dwHeight); i++ ) {
