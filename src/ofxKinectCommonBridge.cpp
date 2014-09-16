@@ -583,6 +583,82 @@ void ofxKinectCommonBridge::drawSkeleton( int index )
 	ofSetColor(255, 255, 255);
 }
 
+// -----------------------------------------------------------------------------------------------------------------------
+
+bool KinectMapColorFrameToDepthFrame()
+{
+	/*KinectMapColorFrameToDepthFrame(KCBHANDLE kcbHandle,
+	NUI_IMAGE_TYPE eColorType, NUI_IMAGE_RESOLUTION eColorResolution,
+	NUI_IMAGE_RESOLUTION eDepthResolution,
+	DWORD cDepthPixels, _In_count_(cDepthPixels) NUI_DEPTH_IMAGE_PIXEL *pDepthPixels,
+	DWORD cDepthPoints, _Inout_cap_(cDepthPoints) NUI_DEPTH_IMAGE_POINT *pDepthPoints);*/
+}
+
+void KinectMapColorFrameToSkeletonFrame()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapColorFrameToSkeletonFrame(KCBHANDLE kcbHandle,
+	//	NUI_IMAGE_TYPE eColorType, NUI_IMAGE_RESOLUTION eColorResolution,
+	//	NUI_IMAGE_RESOLUTION eDepthResolution,
+	//	DWORD cDepthPixels, _In_count_(cDepthPixels) NUI_DEPTH_IMAGE_PIXEL *pDepthPixels,
+	//	DWORD cSkeletonPoints, _Inout_cap_(cSkeletonPoints) Vector4 *pSkeletonPoints);
+}
+
+void MapDepthFrameToColorFrame()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapDepthFrameToColorFrame(KCBHANDLE kcbHandle,
+	//	NUI_IMAGE_RESOLUTION eDepthResolution,
+	//	DWORD cDepthPixels, _In_count_(cDepthPixels) NUI_DEPTH_IMAGE_PIXEL *pDepthPixels,
+	//	NUI_IMAGE_TYPE eColorType, NUI_IMAGE_RESOLUTION eColorResolution,
+	//	DWORD cColorPoints, _Inout_cap_(cColorPoints) NUI_COLOR_IMAGE_POINT *pColorPoints);
+}
+
+void MapDepthFrameToSkeletonFrame()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapDepthFrameToSkeletonFrame(KCBHANDLE kcbHandle,
+	//	NUI_IMAGE_RESOLUTION eDepthResolution,
+	//	DWORD cDepthPixels, _In_count_(cDepthPixels) NUI_DEPTH_IMAGE_PIXEL *pDepthPixels,
+	//	DWORD cSkeletonPoints, _Inout_cap_(cSkeletonPoints) Vector4 *pSkeletonPoints);
+}
+
+void MapDepthPointToColorPoint()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapDepthPointToColorPoint(KCBHANDLE kcbHandle,
+	//	NUI_IMAGE_RESOLUTION eDepthResolution,
+	//	_Inout_ NUI_DEPTH_IMAGE_POINT *pDepthPoint,
+	//	NUI_IMAGE_TYPE eColorType, NUI_IMAGE_RESOLUTION eColorResolution,
+	//	_Inout_ NUI_COLOR_IMAGE_POINT *pColorPoint);
+}
+
+void MapDepthPointToSkeletonPoint()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapDepthPointToSkeletonPoint(KCBHANDLE kcbHandle,
+	//	NUI_IMAGE_RESOLUTION eDepthResolution,
+	//	_Inout_ NUI_DEPTH_IMAGE_POINT *pDepthPoint,
+	//	_Inout_ Vector4 *pSkeletonPoint);
+}
+
+void MapSkeletonPointToColorPoint()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapSkeletonPointToColorPoint(KCBHANDLE kcbHandle,
+	//	_Inout_ Vector4 *pSkeletonPoint,
+	//	NUI_IMAGE_TYPE eColorType, NUI_IMAGE_RESOLUTION eColorResolution,
+	//	_Inout_ NUI_COLOR_IMAGE_POINT *pColorPoint);
+}
+
+void MapSkeletonPointToDepthPoint()
+{
+	//KINECT_CB HRESULT APIENTRY KinectMapSkeletonPointToDepthPoint(KCBHANDLE kcbHandle,
+	//	_Inout_ Vector4 *pSkeletonPoint,
+	//	NUI_IMAGE_RESOLUTION eDepthResolution,
+	//	_Inout_ NUI_DEPTH_IMAGE_POINT *pDepthPoint);
+}
+
+void GetColorFrameFromDepthPoints()
+{
+	//KINECT_CB HRESULT APIENTRY KinectGetColorFrameFromDepthPoints(KCBHANDLE kcbHandle,
+	//	DWORD cDepthPoints, _In_count_(cDepthPoints) NUI_DEPTH_IMAGE_POINT *pDepthPoints,
+	//	ULONG cBufferSize, _Inout_cap_(cBufferSize) BYTE* pColorBuffer, _Out_opt_ LONGLONG* liTimeStamp);
+}
 
 bool ofxKinectCommonBridge::initSensor( int id )
 {
