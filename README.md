@@ -156,6 +156,18 @@ ofxKinectCommonBridge/libs/KinectCommonBridge/lib/windows/vs
 
 A pain, I know, but I had to compile the KinectCommonBridge library differently to get everything we needed included without breaking it for other folks.
 
+You will also need to include the following dll's with your application:
+
+FaceTrackData.dll
+FaceTrackLib.dll
+
+These DLLs are part of the Kinect for Windows Developer Toolkit and are located in C:\Program Files\Microsoft SDKs\Kinect\Developer Toolkit v1.8.0\Redist. You will need to copy the correct versions of the DLLs depending on if you are doing a Win32 or x64 build. The Win32 DLLs are in the Redist\x86 folder and the x64 DLLs are in the Redist\amd64 folder. You can use the following post build event commands to copy the DLLs to your project's output directory:
+
+Win32 Post Build Event
+
+xcopy "$(FTSDK_DIR)Redist\x86\FaceTrackLib.dll" "$(OutDir)" /eiycq
+xcopy "$(FTSDK_DIR)Redist\x86\FaceTrackData.dll" "$(OutDir)" /eiycq
+
 FaceTracking is pretty straight forward:
 
 ```cpp
