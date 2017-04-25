@@ -46,7 +46,7 @@ To get the screen locations of the skeletons and joints of those skeletons
 
 ````
 if(kinect.isNewSkeleton()) {
-		for( int i = 0; i < kinect.getSkeletons().size(); i++) 
+		for( int i = 0; i < kinect.getSkeletons().size(); i++)
 		{
       			// has a head? probably working ok then :)
 			if(kinect.getSkeletons().at(i).find(NUI_SKELETON_POSITION_HEAD) != kinect.getSkeletons().at(i).end())
@@ -80,27 +80,27 @@ So, once you have generated a project that includes ofxKinectCommonBridge:
 
 - Under **VC++ Directories > All Options**
   - Add the following to *Include Directories*
-  
+
     ````
     $(KINECTSDK10_DIR)inc
     $(KINECT_TOOLKIT_DIR)inc
     ````
-        
+
   - Add the following to *Library Directories*
-  
+
     ````
     $(KINECTSDK10_DIR)\lib\x86
     ````
-    
+
 - Under **Linker > All Options**
   - add the following to *Additional Library Directories*
-    
+
         ````
-        ..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows
+        ..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows\vs
         ````
-    
+
   - add the following under *Additional Dependencies*
-  
+
 	    ````
         KinectCommonBridge.lib
         Kinect10.lib
@@ -113,7 +113,7 @@ So, once you have generated a project that includes ofxKinectCommonBridge:
     xcopy /e /i /y "$(ProjectDir)..\..\..\export\vs\*.dll" "$(ProjectDir)bin"
     xcopy /e /i /y "..\..\..\addons\ofxKinectCommonBridge\libs\KinectCommonBridge\lib\windows\*.dll" "$(ProjectDir)bin"
     ````
-    
+
 May require some modification for your specific machine...
 
 # Using Property Sheets to do all these settings automatically
@@ -148,7 +148,7 @@ You'll also need to change your linker settings just a little so that you're lin
 ofxKinectCommonBridge/libs/KinectCommonBridge/lib/windows/vs_Speech
 ```
 
-instead of 
+instead of
 
 ```cpp
 ofxKinectCommonBridge/libs/KinectCommonBridge/lib/windows/vs
@@ -201,7 +201,7 @@ void testApp::setup()
 	kinect.setSpeechGrammarFile(grammarPath);
 	kinect.initSpeech();
 	kinect.start();
-	
+
 	ofAddListener(ofxKCBSpeechEvent::event, this, &testApp::speechEvent);
 }
 ```
